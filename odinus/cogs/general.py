@@ -110,7 +110,8 @@ class GeneralCog(commands.Cog):
             "- `/redes`: muestra las redes sociales de Black Tibii.\n"
             "- `/clear`: elimina mensajes recientes de este canal.\n"
             "- `/slowmode`: configura el modo lento de este canal.\n"
-            "- `/cumpleaños`: registra y configura los avisos de cumpleaños."
+            "- `/cumpleaños`: registra y configura los avisos de cumpleaños.\n"
+            "- `/invitaciones`: configura el seguimiento de invitaciones."
         )
 
     @clear.error

@@ -18,6 +18,7 @@ class OdinusBot(commands.Bot):
     async def setup_hook(self) -> None:
         await self.load_extension("odinus.cogs.general")
         await self.load_extension("odinus.cogs.cumpleanos")
+        await self.load_extension("odinus.cogs.invitaciones")
         await self.load_extension("odinus.cogs.publicar")
         await self.load_extension("odinus.cogs.redes")
         synced_commands = await self.tree.sync()
@@ -27,6 +28,7 @@ class OdinusBot(commands.Bot):
 def create_bot() -> OdinusBot:
     """Build the bot with only the intents needed by this version."""
     intents = discord.Intents.default()
+    intents.members = True
     return OdinusBot(command_prefix="!", intents=intents)
 
 
