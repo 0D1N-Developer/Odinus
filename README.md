@@ -1,59 +1,32 @@
 # Odinus
 
-Odinus is a Discord bot written in Python. Its first command, `/publicar`, posts a
-message in the channel where it is invoked.
+**Odinus** es un asistente de Discord desarrollado en Python y creado como parte
+del ecosistema de **0D1N SOFTWARE**.
 
-## Requirements
+Su propósito es convertirse en una herramienta central para administrar,
+automatizar y facilitar diferentes tareas dentro de comunidades y proyectos de
+Discord.
 
-- Python 3.10 or later
-- A Discord application with a bot created in the
-  [Discord Developer Portal](https://discord.com/developers/applications)
+Odinus está pensado para crecer progresivamente, incorporando nuevas capacidades
+y herramientas que permitan conectar y coordinar diferentes servicios y
+plataformas desde un mismo lugar.
 
-## Setup
+### 🌐 Ecosistema Odin
 
-1. Create and activate a virtual environment:
+Odinus forma parte de la visión de **0D1N SOFTWARE** de desarrollar herramientas
+propias, modulares y conectadas entre sí.
 
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+A medida que el proyecto evolucione, podrá ampliar sus capacidades e incorporar
+nuevas funciones e integraciones con diferentes plataformas.
 
-2. Install dependencies:
+### 🚧 Desarrollo
 
-   ```powershell
-   pip install -r requirements.txt
-   ```
+Odinus se encuentra actualmente en desarrollo.
 
-3. Create your local configuration from the public template:
+Este repositorio documenta su evolución y crecimiento a medida que se incorporan
+nuevas capacidades al proyecto.
 
-   ```powershell
-   Copy-Item .env.example .env
-   ```
+---
 
-4. Open `.env` and set `DISCORD_TOKEN` to the bot token obtained from the Discord
-   Developer Portal. Do not share this value.
-
-5. Install the bot in your server using an installation URL with the `bot` and
-   `applications.commands` scopes.
-
-6. Start Odinus:
-
-   ```powershell
-   py main.py
-   ```
-
-## Usage
-
-In a channel where the bot can send messages, run:
-
-```
-/publicar mensaje: Hello from Odinus
-```
-
-The bot posts the supplied text in that channel and sends a private confirmation.
-
-## Security
-
-`.env` is local-only and must never be committed or uploaded. It is excluded by
-`.gitignore`; only `.env.example`, which contains no credentials, belongs in the
-repository. If a credential is ever exposed, revoke and replace it immediately.
+**0D1N SOFTWARE**<br>
+*Construyendo herramientas. Creando un ecosistema.*
