@@ -21,6 +21,7 @@ venv/
 .mypy_cache/
 logs/
 *.log
+data/
 
 # Editors and operating systems
 .vscode/

@@ -16,7 +16,10 @@ class OdinusBot(commands.Bot):
     """Bot container responsible for loading command modules."""
 
     async def setup_hook(self) -> None:
+        await self.load_extension("odinus.cogs.general")
+        await self.load_extension("odinus.cogs.cumpleanos")
         await self.load_extension("odinus.cogs.publicar")
+        await self.load_extension("odinus.cogs.redes")
         synced_commands = await self.tree.sync()
         LOGGER.info("Synchronized %s application command(s).", len(synced_commands))
 
