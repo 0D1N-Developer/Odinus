@@ -21,6 +21,8 @@ class OdinusBot(commands.Bot):
         await self.load_extension("odinus.cogs.invitaciones")
         await self.load_extension("odinus.cogs.publicar")
         await self.load_extension("odinus.cogs.redes")
+        await self.load_extension("odinus.cogs.paises")
+        await self.load_extension("odinus.cogs.edad")
         synced_commands = await self.tree.sync()
         LOGGER.info("Synchronized %s application command(s).", len(synced_commands))
 
