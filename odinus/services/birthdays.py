@@ -94,6 +94,19 @@ class BirthdayRepository:
             ).fetchall()
         return [Birthday(*row) for row in rows]
 
+    def birthdays_in_guild(self, guild_id: int) -> list[Birthday]:
+        """Return all birthdays registered for one Discord server."""
+        with self._connect() as connection:
+            rows = connection.execute(
+                """
+                SELECT user_id, day, month, year
+                FROM birthdays
+                WHERE guild_id = ?
+                """,
+                (guild_id,),
+            ).fetchall()
+        return [Birthday(*row) for row in rows]
+
     def leap_day_birthdays(self, guild_id: int) -> list[Birthday]:
         """Find February 29 birthdays for non-leap-year February 28 notices."""
         return self.birthdays_for_date(guild_id, day=29, month=2)
