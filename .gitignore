@@ -1,5 +1,13 @@
 # Secrets and local configuration
 .env
+.env.*
+!.env.example
+.envrc
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
 
 # Python
 __pycache__/
@@ -12,6 +20,7 @@ venv/
 .pytest_cache/
 .mypy_cache/
 logs/
+*.log
 
 # Editors and operating systems
 .vscode/

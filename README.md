@@ -1,57 +1,59 @@
 # Odinus
 
-Primera versión funcional de un bot de Discord en Python. Incluye el slash command
-`/publicar`, que publica el mensaje indicado en el canal donde se ejecuta.
+Odinus is a Discord bot written in Python. Its first command, `/publicar`, posts a
+message in the channel where it is invoked.
 
-## Requisitos
+## Requirements
 
-- Python 3.10 o posterior
-- Una aplicación y bot creados en el [Discord Developer Portal](https://discord.com/developers/applications)
+- Python 3.10 or later
+- A Discord application with a bot created in the
+  [Discord Developer Portal](https://discord.com/developers/applications)
 
-## Instalación
+## Setup
 
-1. Crea y activa un entorno virtual:
+1. Create and activate a virtual environment:
 
    ```powershell
    py -m venv .venv
    .\.venv\Scripts\Activate.ps1
    ```
 
-2. Instala las dependencias:
+2. Install dependencies:
 
    ```powershell
    pip install -r requirements.txt
    ```
 
-3. Abre `.env` y asigna el token del bot:
+3. Create your local configuration from the public template:
 
-   ```env
-   DISCORD_TOKEN=tu_token_real
+   ```powershell
+   Copy-Item .env.example .env
    ```
 
-4. En el portal de Discord, genera una URL de instalación con los scopes `bot` y
-   `applications.commands`, e instala el bot en tu servidor.
+4. Open `.env` and set `DISCORD_TOKEN` to the bot token obtained from the Discord
+   Developer Portal. Do not share this value.
 
-5. Inicia Odinus:
+5. Install the bot in your server using an installation URL with the `bot` and
+   `applications.commands` scopes.
+
+6. Start Odinus:
 
    ```powershell
    py main.py
    ```
 
-## Uso
+## Usage
 
-En un canal donde el bot tenga permiso para enviar mensajes, ejecuta:
+In a channel where the bot can send messages, run:
 
 ```
-/publicar mensaje: Hola desde Odinus
+/publicar mensaje: Hello from Odinus
 ```
 
-El bot enviará el texto al canal y te confirmará el resultado de forma privada.
+The bot posts the supplied text in that channel and sends a private confirmation.
 
-## Estructura
+## Security
 
-- `odinus/app.py`: ciclo de vida del bot y registro de módulos.
-- `odinus/cogs/`: comandos de Discord organizados por capacidad.
-- `odinus/integrations/`: punto reservado para futuros proveedores externos; esta versión no integra ninguno.
-- `odinus/config.py`: configuración desde variables de entorno.
-- `odinus/logging_config.py`: logging de consola y `logs/odinus.log`.
+`.env` is local-only and must never be committed or uploaded. It is excluded by
+`.gitignore`; only `.env.example`, which contains no credentials, belongs in the
+repository. If a credential is ever exposed, revoke and replace it immediately.
