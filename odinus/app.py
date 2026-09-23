@@ -9,6 +9,7 @@ from discord.ext import commands
 from odinus.config import load_settings
 from odinus.logging_config import configure_logging
 
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -23,25 +24,42 @@ class OdinusBot(commands.Bot):
         await self.load_extension("odinus.cogs.redes")
         await self.load_extension("odinus.cogs.paises")
         await self.load_extension("odinus.cogs.edad")
+        await self.load_extension("odinus.cogs.niveles")
+        await self.load_extension("odinus.cogs.recompensas")
+        await self.load_extension("odinus.cogs.perfil")
+
         synced_commands = await self.tree.sync()
-        LOGGER.info("Synchronized %s application command(s).", len(synced_commands))
+
+        LOGGER.info(
+            "Synchronized %s application command(s).",
+            len(synced_commands),
+        )
 
 
 def create_bot() -> OdinusBot:
-    """Build the bot with only the intents needed by this version."""
+    """Build the bot with the intents needed by this version."""
     intents = discord.Intents.default()
     intents.members = True
-    return OdinusBot(command_prefix="!", intents=intents)
+    intents.message_content = True
+
+    return OdinusBot(
+        command_prefix="!",
+        intents=intents,
+    )
 
 
 def run() -> None:
     """Start Odinus using validated local settings."""
     configure_logging()
+
     settings = load_settings()
     bot = create_bot()
 
     try:
-        bot.run(settings.discord_token, log_handler=None)
+        bot.run(
+            settings.discord_token,
+            log_handler=None,
+        )
     except KeyboardInterrupt:
         LOGGER.info("Odinus stopped by user.")
     except asyncio.CancelledError:
