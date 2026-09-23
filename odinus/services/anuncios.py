@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 import discord
 
 from odinus.integrations.anuncios.base import AnnouncementEvent
+from odinus.integrations.anuncios.twitch import TwitchIntegration
 from odinus.integrations.anuncios.youtube import YouTubeIntegration
 
 if TYPE_CHECKING:
@@ -319,6 +320,7 @@ class AnnouncementService:
         self.repository = repository
 
         self.youtube = YouTubeIntegration(settings)
+        self.twitch = TwitchIntegration(settings)
 
     async def poll_youtube(self) -> None:
         """Check YouTube and publish new events to configured guilds."""
@@ -352,13 +354,45 @@ class AnnouncementService:
                 events,
             )
 
+    async def poll_twitch(self) -> None:
+        """Check Twitch and publish new live events to configured guilds."""
+        try:
+            events = await self.twitch.fetch_events()
+
+        except Exception:
+            LOGGER.exception(
+                "Unexpected error while polling Twitch."
+            )
+            return
+
+        if not events:
+            LOGGER.info(
+                "Twitch polling completed: no events found."
+            )
+            return
+
+        for guild in self.bot.guilds:
+            config = self.repository.get_config(
+                guild.id,
+                "twitch",
+            )
+
+            if config is None or not config.enabled:
+                continue
+
+            await self._process_guild_events(
+                guild,
+                config,
+                events,
+            )
+
     async def _process_guild_events(
         self,
         guild: discord.Guild,
         config: AnnouncementConfig,
         events: list[AnnouncementEvent],
     ) -> None:
-        """Process YouTube events for one configured guild."""
+        """Process events for one configured announcement platform."""
         channel = guild.get_channel(
             config.channel_id
         )
@@ -430,6 +464,32 @@ class AnnouncementService:
             or "Black Tibii"
         )
 
+        platform = event.platform
+
+        if platform == "twitch":
+            platform_name = "Twitch"
+            announcement_text = (
+                f"{author_name} está en directo!"
+            )
+            action_text = "Ver en Twitch"
+            embed_description = (
+                f"{author_name} está en directo "
+                "en Twitch."
+            )
+            embed_color = discord.Color.purple()
+
+        else:
+            platform_name = "YouTube"
+            announcement_text = (
+                f"{author_name} ha subido un nuevo video!"
+            )
+            action_text = "Ver en YouTube"
+            embed_description = (
+                f"{author_name} publicó un nuevo video "
+                "en YouTube."
+            )
+            embed_color = discord.Color.red()
+
         content_lines: list[str] = []
 
         if config.mention_role_id is not None:
@@ -440,17 +500,17 @@ class AnnouncementService:
             if role is not None:
                 content_lines.append(
                     f"{role.mention} 💀 "
-                    f"{author_name} ha subido un nuevo video! 📹"
+                    f"{announcement_text}"
                 )
             else:
                 content_lines.append(
                     f"@here 💀 "
-                    f"{author_name} ha subido un nuevo video! 📹"
+                    f"{announcement_text}"
                 )
         else:
             content_lines.append(
                 f"@here 💀 "
-                f"{author_name} ha subido un nuevo video! 📹"
+                f"{announcement_text}"
             )
 
         content_lines.extend(
@@ -458,7 +518,10 @@ class AnnouncementService:
                 "",
                 event.title,
                 "",
-                f"🔗 [Ver en YouTube]({event.url})",
+                (
+                    f"🔗 [{action_text}]"
+                    f"({event.url})"
+                ),
             ]
         )
 
@@ -469,6 +532,9 @@ class AnnouncementService:
         embed = self._build_embed(
             event,
             author_name,
+            platform_name,
+            embed_description,
+            embed_color,
         )
 
         allowed_mentions = discord.AllowedMentions(
@@ -486,8 +552,9 @@ class AnnouncementService:
 
         except discord.Forbidden:
             LOGGER.error(
-                "Missing permissions to publish YouTube "
+                "Missing permissions to publish %s "
                 "announcement in guild %s, channel %s.",
+                platform_name,
                 guild.id,
                 channel.id,
             )
@@ -495,8 +562,9 @@ class AnnouncementService:
 
         except discord.HTTPException:
             LOGGER.exception(
-                "Discord rejected YouTube announcement "
+                "Discord rejected %s announcement "
                 "in guild %s, channel %s.",
+                platform_name,
                 guild.id,
                 channel.id,
             )
@@ -514,8 +582,9 @@ class AnnouncementService:
         )
 
         LOGGER.info(
-            "Published YouTube announcement '%s' "
+            "Published %s announcement '%s' "
             "in guild %s, message %s.",
+            platform_name,
             event.title,
             guild.id,
             message.id,
@@ -525,16 +594,16 @@ class AnnouncementService:
     def _build_embed(
         event: AnnouncementEvent,
         author_name: str,
+        platform_name: str,
+        embed_description: str,
+        embed_color: discord.Color,
     ) -> discord.Embed:
-        """Build the visual YouTube announcement embed."""
+        """Build the announcement embed."""
         embed = discord.Embed(
             title=event.title[:256],
             url=event.url,
-            description=(
-                f"{author_name} publicó un nuevo video "
-                "en YouTube."
-            ),
-            color=discord.Color.red(),
+            description=embed_description,
+            color=embed_color,
         )
 
         embed.set_author(
@@ -558,7 +627,7 @@ class AnnouncementService:
                 url=event.thumbnail_url
             )
 
-        footer_text = "YouTube"
+        footer_text = platform_name
 
         if event.published_at:
             try:
@@ -589,14 +658,15 @@ class AnnouncementService:
                 )
 
                 footer_text = (
-                    f"YouTube • "
+                    f"{platform_name} • "
                     f"{published_at.strftime('%d/%m/%Y')} "
                     f"{hour}"
                 )
 
             except ValueError:
                 LOGGER.warning(
-                    "Invalid YouTube publication date: %s",
+                    "Invalid %s publication date: %s",
+                    platform_name,
                     event.published_at,
                 )
 

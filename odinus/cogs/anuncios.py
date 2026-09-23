@@ -67,7 +67,12 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             seconds=self.settings.youtube_poll_interval
         )
 
+        self.twitch_poller.change_interval(
+            seconds=self.settings.twitch_poll_interval
+        )
+
         self.youtube_poller.start()
+        self.twitch_poller.start()
 
         LOGGER.info(
             "YouTube announcement poller started. "
@@ -75,9 +80,16 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             self.settings.youtube_poll_interval,
         )
 
+        LOGGER.info(
+            "Twitch announcement poller started. "
+            "Interval: %s seconds.",
+            self.settings.twitch_poll_interval,
+        )
+
     def cog_unload(self) -> None:
         """Stop background tasks when the cog is unloaded."""
         self.youtube_poller.cancel()
+        self.twitch_poller.cancel()
 
     @tasks.loop(seconds=60)
     async def youtube_poller(self) -> None:
@@ -86,6 +98,16 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
 
     @youtube_poller.before_loop
     async def before_youtube_poller(self) -> None:
+        """Wait until Discord is ready before polling."""
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(seconds=60)
+    async def twitch_poller(self) -> None:
+        """Poll Twitch for new live streams."""
+        await self.service.poll_twitch()
+
+    @twitch_poller.before_loop
+    async def before_twitch_poller(self) -> None:
         """Wait until Discord is ready before polling."""
         await self.bot.wait_until_ready()
 
@@ -256,22 +278,28 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
         if interaction.guild is None:
             return
 
-        if plataforma.value != "youtube":
+        if plataforma.value not in (
+            "youtube",
+            "twitch",
+        ):
             await interaction.response.send_message(
                 "⚠️ Por ahora la comprobación manual "
-                "solo está disponible para YouTube.",
+                "solo está disponible para YouTube y Twitch.",
                 ephemeral=True,
             )
             return
 
+        platform = plataforma.value
+        label = PLATFORM_LABELS[platform]
+
         config = self.repository.get_config(
             interaction.guild.id,
-            "youtube",
+            platform,
         )
 
         if config is None:
             await interaction.response.send_message(
-                "❌ YouTube todavía no está configurado "
+                f"❌ {label} todavía no está configurado "
                 "en este servidor.",
                 ephemeral=True,
             )
@@ -279,7 +307,7 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
 
         if not config.enabled:
             await interaction.response.send_message(
-                "⏸️ Los anuncios de YouTube están desactivados.",
+                f"⏸️ Los anuncios de {label} están desactivados.",
                 ephemeral=True,
             )
             return
@@ -288,9 +316,12 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             config.channel_id
         )
 
-        if not isinstance(channel, discord.TextChannel):
+        if not isinstance(
+            channel,
+            discord.TextChannel,
+        ):
             await interaction.response.send_message(
-                "❌ El canal configurado para YouTube "
+                f"❌ El canal configurado para {label} "
                 "no existe o no es un canal de texto.",
                 ephemeral=True,
             )
@@ -301,24 +332,36 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
         )
 
         try:
-            events = await self.service.youtube.fetch_events()
+            if platform == "youtube":
+                events = await self.service.youtube.fetch_events()
+            else:
+                events = await self.service.twitch.fetch_events()
 
         except Exception:
             LOGGER.exception(
-                "Manual YouTube check failed."
+                "Manual %s check failed.",
+                platform,
             )
 
             await interaction.followup.send(
-                "❌ Ocurrió un error al consultar YouTube.",
+                f"❌ Ocurrió un error al consultar {label}.",
                 ephemeral=True,
             )
             return
 
         if not events:
-            await interaction.followup.send(
-                "ℹ️ YouTube no devolvió contenido.",
-                ephemeral=True,
-            )
+            if platform == "twitch":
+                await interaction.followup.send(
+                    "ℹ️ El canal de Twitch no está "
+                    "en directo actualmente.",
+                    ephemeral=True,
+                )
+            else:
+                await interaction.followup.send(
+                    "ℹ️ YouTube no devolvió contenido.",
+                    ephemeral=True,
+                )
+
             return
 
         new_events = 0
@@ -326,7 +369,7 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
         for event in reversed(events):
             if self.repository.event_exists(
                 interaction.guild.id,
-                "youtube",
+                platform,
                 event.external_id,
             ):
                 continue
@@ -340,12 +383,62 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
 
             if self.repository.event_exists(
                 interaction.guild.id,
-                "youtube",
+                platform,
                 event.external_id,
             ):
                 new_events += 1
 
         if new_events == 0:
+            if platform == "twitch":
+                preview_event = AnnouncementEvent(
+                    platform="twitch",
+                    external_id="preview",
+                    event_type="live",
+                    title="Mi stream en vivo — Ejemplo",
+                    url="https://www.twitch.tv/ejemplo",
+                    description=(
+                        "Just Chatting • "
+                        "123 espectadores"
+                    ),
+                    thumbnail_url=(
+                        "https://placehold.co/1280x720/png"
+                        "?text=TWITCH+LIVE"
+                    ),
+                    published_at=datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+                    author_name="Black Tibii",
+                )
+
+                preview_embed = self.service._build_embed(
+                    preview_event,
+                    "Black Tibii",
+                    "Twitch",
+                    "Black Tibii está en directo en Twitch.",
+                    discord.Color.purple(),
+                )
+
+                preview_content = (
+                    "@here 💀 Black Tibii está en directo!\n\n"
+                    "Mi stream en vivo — Ejemplo\n\n"
+                    "🔗 [Ver en Twitch]"
+                    "(https://www.twitch.tv/ejemplo)"
+                )
+
+                await interaction.followup.send(
+                    content=(
+                        "✅ **Comprobación completada.** "
+                        "No hay un stream nuevo.\n\n"
+                        "👁️ **Vista previa del anuncio:**\n\n"
+                        f"{preview_content}"
+                    ),
+                    embed=preview_embed,
+                    allowed_mentions=discord.AllowedMentions.none(),
+                    ephemeral=True,
+                )
+
+                return
+
             preview_event = AnnouncementEvent(
                 platform="youtube",
                 external_id="preview",
@@ -375,6 +468,9 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             preview_embed = self.service._build_embed(
                 preview_event,
                 "Black Tibii",
+                "YouTube",
+                "Black Tibii publicó un nuevo video en YouTube.",
+                discord.Color.red(),
             )
 
             preview_content = (
