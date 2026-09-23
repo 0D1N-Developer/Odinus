@@ -21,6 +21,10 @@ class Settings:
     twitch_channel: str
     twitch_poll_interval: int
 
+    instagram_user_id: str
+    instagram_access_token: str
+    instagram_poll_interval: int
+
 
 def load_settings() -> Settings:
     """Load and validate settings from the local environment."""
@@ -56,6 +60,16 @@ def load_settings() -> Settings:
         "",
     ).strip()
 
+    instagram_user_id = os.getenv(
+        "INSTAGRAM_USER_ID",
+        "",
+    ).strip()
+
+    instagram_access_token = os.getenv(
+        "INSTAGRAM_ACCESS_TOKEN",
+        "",
+    ).strip()
+
     youtube_poll_interval_raw = os.getenv(
         "YOUTUBE_POLL_INTERVAL",
         "300",
@@ -64,6 +78,11 @@ def load_settings() -> Settings:
     twitch_poll_interval_raw = os.getenv(
         "TWITCH_POLL_INTERVAL",
         "60",
+    ).strip()
+
+    instagram_poll_interval_raw = os.getenv(
+        "INSTAGRAM_POLL_INTERVAL",
+        "300",
     ).strip()
 
     if not token:
@@ -102,6 +121,18 @@ def load_settings() -> Settings:
             "Add your Twitch channel name to the .env file."
         )
 
+    if not instagram_user_id:
+        raise RuntimeError(
+            "INSTAGRAM_USER_ID is not configured. "
+            "Add your Instagram user ID to the .env file."
+        )
+
+    if not instagram_access_token:
+        raise RuntimeError(
+            "INSTAGRAM_ACCESS_TOKEN is not configured. "
+            "Add your Instagram access token to the .env file."
+        )
+
     try:
         youtube_poll_interval = int(
             youtube_poll_interval_raw
@@ -132,6 +163,21 @@ def load_settings() -> Settings:
             "TWITCH_POLL_INTERVAL must be greater than 0."
         )
 
+    try:
+        instagram_poll_interval = int(
+            instagram_poll_interval_raw
+        )
+    except ValueError as error:
+        raise RuntimeError(
+            "INSTAGRAM_POLL_INTERVAL must be a valid integer "
+            "in seconds."
+        ) from error
+
+    if instagram_poll_interval <= 0:
+        raise RuntimeError(
+            "INSTAGRAM_POLL_INTERVAL must be greater than 0."
+        )
+
     return Settings(
         discord_token=token,
         youtube_api_key=youtube_api_key,
@@ -141,4 +187,7 @@ def load_settings() -> Settings:
         twitch_client_secret=twitch_client_secret,
         twitch_channel=twitch_channel,
         twitch_poll_interval=twitch_poll_interval,
+        instagram_user_id=instagram_user_id,
+        instagram_access_token=instagram_access_token,
+        instagram_poll_interval=instagram_poll_interval,
     )
