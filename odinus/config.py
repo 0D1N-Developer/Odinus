@@ -25,6 +25,10 @@ class Settings:
     instagram_access_token: str
     instagram_poll_interval: int
 
+    facebook_page_id: str
+    facebook_page_access_token: str
+    facebook_poll_interval: int
+
 
 def load_settings() -> Settings:
     """Load and validate settings from the local environment."""
@@ -70,6 +74,16 @@ def load_settings() -> Settings:
         "",
     ).strip()
 
+    facebook_page_id = os.getenv(
+        "FACEBOOK_PAGE_ID",
+        "",
+    ).strip()
+
+    facebook_page_access_token = os.getenv(
+        "FACEBOOK_PAGE_ACCESS_TOKEN",
+        "",
+    ).strip()
+
     youtube_poll_interval_raw = os.getenv(
         "YOUTUBE_POLL_INTERVAL",
         "300",
@@ -82,6 +96,11 @@ def load_settings() -> Settings:
 
     instagram_poll_interval_raw = os.getenv(
         "INSTAGRAM_POLL_INTERVAL",
+        "300",
+    ).strip()
+
+    facebook_poll_interval_raw = os.getenv(
+        "FACEBOOK_POLL_INTERVAL",
         "300",
     ).strip()
 
@@ -133,6 +152,18 @@ def load_settings() -> Settings:
             "Add your Instagram access token to the .env file."
         )
 
+    if not facebook_page_id:
+        raise RuntimeError(
+            "FACEBOOK_PAGE_ID is not configured. "
+            "Add your Facebook Page ID to the .env file."
+        )
+
+    if not facebook_page_access_token:
+        raise RuntimeError(
+            "FACEBOOK_PAGE_ACCESS_TOKEN is not configured. "
+            "Add your Facebook Page access token to the .env file."
+        )
+
     try:
         youtube_poll_interval = int(
             youtube_poll_interval_raw
@@ -178,6 +209,21 @@ def load_settings() -> Settings:
             "INSTAGRAM_POLL_INTERVAL must be greater than 0."
         )
 
+    try:
+        facebook_poll_interval = int(
+            facebook_poll_interval_raw
+        )
+    except ValueError as error:
+        raise RuntimeError(
+            "FACEBOOK_POLL_INTERVAL must be a valid integer "
+            "in seconds."
+        ) from error
+
+    if facebook_poll_interval <= 0:
+        raise RuntimeError(
+            "FACEBOOK_POLL_INTERVAL must be greater than 0."
+        )
+
     return Settings(
         discord_token=token,
         youtube_api_key=youtube_api_key,
@@ -190,4 +236,7 @@ def load_settings() -> Settings:
         instagram_user_id=instagram_user_id,
         instagram_access_token=instagram_access_token,
         instagram_poll_interval=instagram_poll_interval,
+        facebook_page_id=facebook_page_id,
+        facebook_page_access_token=facebook_page_access_token,
+        facebook_poll_interval=facebook_poll_interval,
     )

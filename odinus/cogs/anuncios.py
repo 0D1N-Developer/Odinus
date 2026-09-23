@@ -53,6 +53,10 @@ INSTAGRAM_ICON_URL = (
     "https://cdn.simpleicons.org/instagram/E4405F"
 )
 
+FACEBOOK_ICON_URL = (
+    "https://cdn.simpleicons.org/facebook/1877F2"
+)
+
 
 class AnunciosCog(commands.GroupCog, group_name="anuncios"):
     """Manage the Odinus automatic announcement center."""
@@ -88,9 +92,14 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             seconds=self.settings.instagram_poll_interval
         )
 
+        self.facebook_poller.change_interval(
+            seconds=self.settings.facebook_poll_interval
+        )
+
         self.youtube_poller.start()
         self.twitch_poller.start()
         self.instagram_poller.start()
+        self.facebook_poller.start()
 
         LOGGER.info(
             "YouTube announcement poller started. "
@@ -110,11 +119,18 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             self.settings.instagram_poll_interval,
         )
 
+        LOGGER.info(
+            "Facebook announcement poller started. "
+            "Interval: %s seconds.",
+            self.settings.facebook_poll_interval,
+        )
+
     def cog_unload(self) -> None:
         """Stop background tasks when the cog is unloaded."""
         self.youtube_poller.cancel()
         self.twitch_poller.cancel()
         self.instagram_poller.cancel()
+        self.facebook_poller.cancel()
 
     @tasks.loop(seconds=60)
     async def youtube_poller(self) -> None:
@@ -143,6 +159,16 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
 
     @instagram_poller.before_loop
     async def before_instagram_poller(self) -> None:
+        """Wait until Discord is ready before polling."""
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(seconds=60)
+    async def facebook_poller(self) -> None:
+        """Poll Facebook for new posts and Reels."""
+        await self.service.poll_facebook()
+
+    @facebook_poller.before_loop
+    async def before_facebook_poller(self) -> None:
         """Wait until Discord is ready before polling."""
         await self.bot.wait_until_ready()
 
@@ -317,11 +343,12 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             "youtube",
             "twitch",
             "instagram",
+            "facebook",
         ):
             await interaction.response.send_message(
                 "⚠️ Por ahora la comprobación manual "
-                "solo está disponible para YouTube, Twitch "
-                "e Instagram.",
+                "solo está disponible para YouTube, Twitch, "
+                "Instagram y Facebook.",
                 ephemeral=True,
             )
             return
@@ -375,8 +402,11 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             elif platform == "twitch":
                 events = await self.service.twitch.fetch_events()
 
-            else:
+            elif platform == "instagram":
                 events = await self.service.instagram.fetch_events()
+
+            else:
+                events = await self.service.facebook.fetch_events()
 
         except Exception:
             LOGGER.exception(
@@ -511,6 +541,73 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
                     "#BlackTibii #Rock #Music\n\n"
                     "🔗 [Ver en Instagram]"
                     "(https://www.instagram.com/)"
+                )
+
+                await interaction.followup.send(
+                    content=preview_content,
+                    embed=preview_embed,
+                    allowed_mentions=discord.AllowedMentions.none(),
+                    ephemeral=True,
+                )
+
+                return
+
+            if platform == "facebook":
+                await interaction.followup.send(
+                    "ℹ️ Facebook no devolvió contenido nuevo.\n\n"
+                    "👁️ **Vista previa del anuncio:**",
+                    ephemeral=True,
+                )
+
+                preview_event = AnnouncementEvent(
+                    platform="facebook",
+                    external_id="preview",
+                    event_type="post",
+                    title=(
+                        "Black Tibii publicó una nueva publicación."
+                    ),
+                    url="https://www.facebook.com/",
+                    description=(
+                        "Esta es una descripción de ejemplo "
+                        "para comprobar cómo se verá una "
+                        "publicación de Facebook."
+                    ),
+                    thumbnail_url=(
+                        "https://placehold.co/1280x720/png"
+                        "?text=FACEBOOK+POST"
+                    ),
+                    image_url=(
+                        "https://placehold.co/256x256/png"
+                        "?text=BLACK+TIBII"
+                    ),
+                    published_at=datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+                    author_name="Black Tibii",
+                    author_icon_url=(
+                        "https://placehold.co/256x256/png"
+                        "?text=BLACK+TIBII"
+                    ),
+                    platform_icon_url=FACEBOOK_ICON_URL,
+                )
+
+                preview_embed = self.service._build_embed(
+                    preview_event,
+                    "Black Tibii",
+                    "Facebook",
+                    (
+                        "Black Tibii publicó una nueva "
+                        "publicación en Facebook."
+                    ),
+                    discord.Color.blue(),
+                )
+
+                preview_content = (
+                    "@here 💀 Black Tibii publicó algo nuevo! 📘\n\n"
+                    "Nueva publicación — "
+                    "#BlackTibii #Rock #Music\n\n"
+                    "🔗 [Ver en Facebook]"
+                    "(https://www.facebook.com/)"
                 )
 
                 await interaction.followup.send(
@@ -662,6 +759,72 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
                     "#BlackTibii #Rock #Music\n\n"
                     "🔗 [Ver en Instagram]"
                     "(https://www.instagram.com/)"
+                )
+
+                await interaction.followup.send(
+                    content=(
+                        "✅ **Comprobación completada.** "
+                        "No hay contenido nuevo.\n\n"
+                        "👁️ **Vista previa del anuncio:**\n\n"
+                        f"{preview_content}"
+                    ),
+                    embed=preview_embed,
+                    allowed_mentions=discord.AllowedMentions.none(),
+                    ephemeral=True,
+                )
+
+                return
+
+            if platform == "facebook":
+                preview_event = AnnouncementEvent(
+                    platform="facebook",
+                    external_id="preview",
+                    event_type="post",
+                    title=(
+                        "Black Tibii publicó una nueva publicación."
+                    ),
+                    url="https://www.facebook.com/",
+                    description=(
+                        "Esta es una descripción de ejemplo "
+                        "para comprobar cómo se verá una "
+                        "publicación de Facebook."
+                    ),
+                    thumbnail_url=(
+                        "https://placehold.co/1280x720/png"
+                        "?text=FACEBOOK+POST"
+                    ),
+                    image_url=(
+                        "https://placehold.co/256x256/png"
+                        "?text=BLACK+TIBII"
+                    ),
+                    published_at=datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+                    author_name="Black Tibii",
+                    author_icon_url=(
+                        "https://placehold.co/256x256/png"
+                        "?text=BLACK+TIBII"
+                    ),
+                    platform_icon_url=FACEBOOK_ICON_URL,
+                )
+
+                preview_embed = self.service._build_embed(
+                    preview_event,
+                    "Black Tibii",
+                    "Facebook",
+                    (
+                        "Black Tibii publicó una nueva "
+                        "publicación en Facebook."
+                    ),
+                    discord.Color.blue(),
+                )
+
+                preview_content = (
+                    "@here 💀 Black Tibii publicó algo nuevo! 📘\n\n"
+                    "Nueva publicación — "
+                    "#BlackTibii #Rock #Music\n\n"
+                    "🔗 [Ver en Facebook]"
+                    "(https://www.facebook.com/)"
                 )
 
                 await interaction.followup.send(

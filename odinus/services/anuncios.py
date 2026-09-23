@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 import discord
 
 from odinus.integrations.anuncios.base import AnnouncementEvent
+from odinus.integrations.anuncios.facebook import FacebookIntegration
 from odinus.integrations.anuncios.instagram import InstagramIntegration
 from odinus.integrations.anuncios.twitch import TwitchIntegration
 from odinus.integrations.anuncios.youtube import YouTubeIntegration
@@ -323,6 +324,7 @@ class AnnouncementService:
         self.youtube = YouTubeIntegration(settings)
         self.twitch = TwitchIntegration(settings)
         self.instagram = InstagramIntegration(settings)
+        self.facebook = FacebookIntegration(settings)
 
     async def poll_youtube(self) -> None:
         """Check YouTube and publish new events to configured guilds."""
@@ -409,6 +411,38 @@ class AnnouncementService:
             config = self.repository.get_config(
                 guild.id,
                 "instagram",
+            )
+
+            if config is None or not config.enabled:
+                continue
+
+            await self._process_guild_events(
+                guild,
+                config,
+                events,
+            )
+
+    async def poll_facebook(self) -> None:
+        """Check Facebook and publish new posts and Reels."""
+        try:
+            events = await self.facebook.fetch_events()
+
+        except Exception:
+            LOGGER.exception(
+                "Unexpected error while polling Facebook."
+            )
+            return
+
+        if not events:
+            LOGGER.info(
+                "Facebook polling completed: no events found."
+            )
+            return
+
+        for guild in self.bot.guilds:
+            config = self.repository.get_config(
+                guild.id,
+                "facebook",
             )
 
             if config is None or not config.enabled:
@@ -534,6 +568,29 @@ class AnnouncementService:
 
             action_text = "Ver en Instagram"
             embed_color = discord.Color.magenta()
+
+        elif platform == "facebook":
+            platform_name = "Facebook"
+
+            if event.event_type == "reel":
+                announcement_text = (
+                    f"{author_name} publicó un nuevo Reel!"
+                )
+                embed_description = (
+                    f"{author_name} publicó un nuevo Reel "
+                    "en Facebook."
+                )
+            else:
+                announcement_text = (
+                    f"{author_name} publicó una nueva publicación!"
+                )
+                embed_description = (
+                    f"{author_name} publicó una nueva "
+                    "publicación en Facebook."
+                )
+
+            action_text = "Ver en Facebook"
+            embed_color = discord.Color.blue()
 
         else:
             platform_name = "YouTube"
@@ -691,6 +748,9 @@ class AnnouncementService:
         #
         # Instagram:
         #   Foto de perfil de la cuenta.
+        #
+        # Facebook:
+        #   Foto de perfil de la página.
         if event.image_url:
             embed.set_thumbnail(
                 url=event.image_url
@@ -706,6 +766,9 @@ class AnnouncementService:
         #
         # Instagram:
         #   Imagen o miniatura del post/Reel.
+        #
+        # Facebook:
+        #   Imagen o miniatura de la publicación/Reel.
         if event.thumbnail_url:
             embed.set_image(
                 url=event.thumbnail_url
