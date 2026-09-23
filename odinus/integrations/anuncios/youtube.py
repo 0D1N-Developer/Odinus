@@ -17,6 +17,10 @@ LOGGER = logging.getLogger(__name__)
 
 YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3"
 
+YOUTUBE_ICON_URL = (
+    "https://cdn.simpleicons.org/youtube/FF0000"
+)
+
 
 class YouTubeIntegration(AnnouncementIntegration):
     """Discover new public videos from a YouTube channel."""
@@ -26,7 +30,9 @@ class YouTubeIntegration(AnnouncementIntegration):
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
 
-    async def fetch_events(self) -> list[AnnouncementEvent]:
+    async def fetch_events(
+        self,
+    ) -> list[AnnouncementEvent]:
         """Return the latest videos from the configured YouTube channel."""
         channel = await self._get_channel()
 
@@ -35,6 +41,7 @@ class YouTubeIntegration(AnnouncementIntegration):
 
         uploads_playlist_id = channel["uploads_playlist_id"]
         channel_title = channel["channel_title"]
+        channel_icon_url = channel["channel_icon_url"]
 
         videos = await self._get_latest_videos(
             uploads_playlist_id
@@ -51,9 +58,16 @@ class YouTubeIntegration(AnnouncementIntegration):
                     f'{video["video_id"]}'
                 ),
                 description=video["description"],
+                # SE CONSERVA: miniatura grande del video.
                 thumbnail_url=video["thumbnail_url"],
+                # NUEVO: foto de perfil cuadrada de YouTube.
+                image_url=channel_icon_url or None,
                 published_at=video["published_at"],
+                # NUEVO: avatar circular del autor.
                 author_name=channel_title,
+                author_icon_url=channel_icon_url or None,
+                # NUEVO: logo de YouTube para el footer.
+                platform_icon_url=YOUTUBE_ICON_URL,
             )
             for video in videos
         ]
@@ -83,10 +97,38 @@ class YouTubeIntegration(AnnouncementIntegration):
         item = data["items"][0]
 
         try:
-            channel_title = item["snippet"]["title"]
+            snippet = item["snippet"]
+
+            channel_title = snippet["title"]
+
             uploads_playlist_id = item[
                 "contentDetails"
             ]["relatedPlaylists"]["uploads"]
+
+            thumbnails = snippet.get(
+                "thumbnails",
+                {},
+            )
+
+            channel_icon_url = ""
+
+            for thumbnail_name in (
+                "high",
+                "medium",
+                "default",
+            ):
+                thumbnail = thumbnails.get(
+                    thumbnail_name
+                )
+
+                if thumbnail:
+                    channel_icon_url = str(
+                        thumbnail.get("url") or ""
+                    )
+
+                    if channel_icon_url:
+                        break
+
         except (KeyError, TypeError):
             LOGGER.error(
                 "YouTube channel response is missing "
@@ -99,6 +141,7 @@ class YouTubeIntegration(AnnouncementIntegration):
             "uploads_playlist_id": str(
                 uploads_playlist_id
             ),
+            "channel_icon_url": channel_icon_url,
         }
 
     async def _get_latest_videos(
@@ -142,7 +185,9 @@ class YouTubeIntegration(AnnouncementIntegration):
                 "medium",
                 "default",
             ):
-                thumbnail = thumbnails.get(thumbnail_name)
+                thumbnail = thumbnails.get(
+                    thumbnail_name
+                )
 
                 if thumbnail:
                     thumbnail_url = thumbnail.get("url")

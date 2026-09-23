@@ -41,6 +41,15 @@ PLATFORM_CHOICES = [
 ]
 
 
+YOUTUBE_ICON_URL = (
+    "https://cdn.simpleicons.org/youtube/FF0000"
+)
+
+TWITCH_ICON_URL = (
+    "https://cdn.simpleicons.org/twitch/9146FF"
+)
+
+
 class AnunciosCog(commands.GroupCog, group_name="anuncios"):
     """Manage the Odinus automatic announcement center."""
 
@@ -353,15 +362,71 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
             if platform == "twitch":
                 await interaction.followup.send(
                     "ℹ️ El canal de Twitch no está "
-                    "en directo actualmente.",
-                    ephemeral=True,
-                )
-            else:
-                await interaction.followup.send(
-                    "ℹ️ YouTube no devolvió contenido.",
+                    "en directo actualmente.\n\n"
+                    "👁️ **Vista previa del anuncio:**",
                     ephemeral=True,
                 )
 
+                preview_event = AnnouncementEvent(
+                    platform="twitch",
+                    external_id="preview",
+                    event_type="live",
+                    title="Mi stream en vivo — Ejemplo",
+                    url="https://www.twitch.tv/ejemplo",
+                    description=(
+                        "Just Chatting • "
+                        "123 espectadores"
+                    ),
+                    thumbnail_url=(
+                        "https://placehold.co/1280x720/png"
+                        "?text=TWITCH+LIVE"
+                    ),
+                    image_url=(
+                        "https://placehold.co/285x380/png"
+                        "?text=GAME+COVER"
+                    ),
+                    published_at=datetime.now(
+                        timezone.utc
+                    ).isoformat(),
+                    author_name="Black Tibii",
+                    author_icon_url=(
+                        "https://placehold.co/256x256/png"
+                        "?text=BLACK+TIBII"
+                    ),
+                    platform_icon_url=TWITCH_ICON_URL,
+                )
+
+                preview_embed = self.service._build_embed(
+                    preview_event,
+                    "Black Tibii",
+                    "Twitch",
+                    (
+                        "Black Tibii está en directo "
+                        "en Twitch."
+                    ),
+                    discord.Color.purple(),
+                )
+
+                preview_content = (
+                    "@here 💀 Black Tibii está en directo! 📺\n\n"
+                    "Mi stream en vivo — Ejemplo\n\n"
+                    "🔗 [Ver en Twitch]"
+                    "(https://www.twitch.tv/ejemplo)"
+                )
+
+                await interaction.followup.send(
+                    content=preview_content,
+                    embed=preview_embed,
+                    allowed_mentions=discord.AllowedMentions.none(),
+                    ephemeral=True,
+                )
+
+                return
+
+            await interaction.followup.send(
+                "ℹ️ YouTube no devolvió contenido.",
+                ephemeral=True,
+            )
             return
 
         new_events = 0
@@ -404,10 +469,19 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
                         "https://placehold.co/1280x720/png"
                         "?text=TWITCH+LIVE"
                     ),
+                    image_url=(
+                        "https://placehold.co/285x380/png"
+                        "?text=GAME+COVER"
+                    ),
                     published_at=datetime.now(
                         timezone.utc
                     ).isoformat(),
                     author_name="Black Tibii",
+                    author_icon_url=(
+                        "https://placehold.co/256x256/png"
+                        "?text=BLACK+TIBII"
+                    ),
+                    platform_icon_url=TWITCH_ICON_URL,
                 )
 
                 preview_embed = self.service._build_embed(
@@ -459,10 +533,19 @@ class AnunciosCog(commands.GroupCog, group_name="anuncios"):
                     "https://placehold.co/1280x720/png"
                     "?text=MINIATURA+DE+EJEMPLO"
                 ),
+                image_url=(
+                    "https://placehold.co/256x256/png"
+                    "?text=BLACK+TIBII"
+                ),
                 published_at=datetime.now(
                     timezone.utc
                 ).isoformat(),
                 author_name="Black Tibii",
+                author_icon_url=(
+                    "https://placehold.co/256x256/png"
+                    "?text=BLACK+TIBII"
+                ),
+                platform_icon_url=YOUTUBE_ICON_URL,
             )
 
             preview_embed = self.service._build_embed(

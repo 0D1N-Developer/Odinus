@@ -606,8 +606,10 @@ class AnnouncementService:
             color=embed_color,
         )
 
+        # FOTO DE PERFIL CIRCULAR A LA IZQUIERDA.
         embed.set_author(
-            name=author_name[:256]
+            name=author_name[:256],
+            icon_url=event.author_icon_url,
         )
 
         description = (
@@ -622,6 +624,25 @@ class AnnouncementService:
             inline=False,
         )
 
+        # IMAGEN CUADRADA ARRIBA A LA DERECHA.
+        #
+        # YouTube:
+        #   Foto de perfil del canal.
+        #
+        # Twitch:
+        #   Portada/categoría del juego.
+        if event.image_url:
+            embed.set_thumbnail(
+                url=event.image_url
+            )
+
+        # MINIATURA GRANDE ABAJO.
+        #
+        # YouTube:
+        #   Miniatura del video.
+        #
+        # Twitch:
+        #   Miniatura del stream.
         if event.thumbnail_url:
             embed.set_image(
                 url=event.thumbnail_url
@@ -670,8 +691,10 @@ class AnnouncementService:
                     event.published_at,
                 )
 
+        # LOGO PEQUEÑO DE YOUTUBE/TWITCH + FECHA/HORA.
         embed.set_footer(
-            text=footer_text
+            text=footer_text,
+            icon_url=event.platform_icon_url,
         )
 
         return embed

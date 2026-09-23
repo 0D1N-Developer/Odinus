@@ -18,6 +18,10 @@ LOGGER = logging.getLogger(__name__)
 TWITCH_API_BASE = "https://api.twitch.tv/helix"
 TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token"
 
+TWITCH_ICON_URL = (
+    "https://cdn.simpleicons.org/twitch/9146FF"
+)
+
 
 class TwitchIntegration(AnnouncementIntegration):
     """Discover live streams from a Twitch channel."""
@@ -59,12 +63,20 @@ class TwitchIntegration(AnnouncementIntegration):
         if stream is None:
             return []
 
+        game_icon_url = await self._get_game_icon(
+            access_token,
+            stream["game_id"],
+        )
+
         return [
             AnnouncementEvent(
                 platform=self.platform,
                 external_id=stream["id"],
                 event_type="live",
-                title=stream["title"] or "Stream en vivo",
+                title=(
+                    stream["title"]
+                    or "Stream en vivo"
+                ),
                 url=(
                     "https://www.twitch.tv/"
                     f'{stream["user_login"]}'
@@ -75,11 +87,21 @@ class TwitchIntegration(AnnouncementIntegration):
                     if stream["game_name"]
                     else None
                 ),
+                # SE CONSERVA: miniatura grande del stream.
                 thumbnail_url=self._build_thumbnail_url(
                     stream
                 ),
+                # NUEVO: portada cuadrada del juego.
+                image_url=game_icon_url,
                 published_at=stream["started_at"],
+                # NUEVO: avatar circular del canal.
                 author_name=stream["user_name"],
+                author_icon_url=(
+                    streamer["profile_image_url"]
+                    or None
+                ),
+                # NUEVO: logo de Twitch para el footer.
+                platform_icon_url=TWITCH_ICON_URL,
             )
         ]
 
@@ -180,6 +202,10 @@ class TwitchIntegration(AnnouncementIntegration):
                 "display_name": str(
                     user["display_name"]
                 ),
+                "profile_image_url": str(
+                    user.get("profile_image_url")
+                    or ""
+                ),
             }
         except (KeyError, TypeError):
             LOGGER.error(
@@ -225,6 +251,9 @@ class TwitchIntegration(AnnouncementIntegration):
                 "user_name": str(
                     stream["user_name"]
                 ),
+                "game_id": str(
+                    stream.get("game_id") or ""
+                ),
                 "game_name": str(
                     stream.get("game_name") or ""
                 ),
@@ -248,6 +277,43 @@ class TwitchIntegration(AnnouncementIntegration):
                 "required information."
             )
             return None
+
+    async def _get_game_icon(
+        self,
+        access_token: str,
+        game_id: str,
+    ) -> str | None:
+        """Get the Twitch game cover image."""
+        if not game_id:
+            return None
+
+        params = {
+            "id": game_id,
+        }
+
+        data = await self._request(
+            "/games",
+            params,
+            access_token,
+        )
+
+        if not data or not data.get("data"):
+            return None
+
+        game = data["data"][0]
+
+        box_art_url = str(
+            game.get("box_art_url") or ""
+        )
+
+        if not box_art_url:
+            return None
+
+        return (
+            box_art_url
+            .replace("{width}", "285")
+            .replace("{height}", "380")
+        )
 
     async def _request(
         self,

@@ -16,8 +16,11 @@ class AnnouncementEvent:
     url: str | None = None
     description: str | None = None
     thumbnail_url: str | None = None
+    image_url: str | None = None
     published_at: str | None = None
     author_name: str | None = None
+    author_icon_url: str | None = None
+    platform_icon_url: str | None = None
 
 
 class AnnouncementIntegration:
