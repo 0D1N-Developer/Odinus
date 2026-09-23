@@ -27,6 +27,7 @@ class OdinusBot(commands.Bot):
         await self.load_extension("odinus.cogs.niveles")
         await self.load_extension("odinus.cogs.recompensas")
         await self.load_extension("odinus.cogs.perfil")
+        await self.load_extension("odinus.cogs.anuncios")
 
         synced_commands = await self.tree.sync()
 
