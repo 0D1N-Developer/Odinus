@@ -12,19 +12,144 @@
   Asistente de Discord desarrollado en Python por <strong>0D1N SOFTWARE</strong>.
 </p>
 
-Odinus es una herramienta central para administrar, automatizar y facilitar tareas
-dentro de comunidades y proyectos de Discord. Su arquitectura modular permite
-ampliar sus capacidades progresivamente desde un solo lugar.
+Odinus es una herramienta modular para administrar, automatizar y facilitar tareas
+dentro de comunidades de Discord. Su arquitectura permite incorporar progresivamente
+nuevos sistemas e integraciones desde un mismo bot.
 
 ## Funciones actuales
 
-- `/ping`: comprueba que Odinus está activo.
-- `/ayuda`: muestra los comandos disponibles.
-- `/publicar`: permite a administradores publicar en un canal seleccionado.
-- `/redes`: comparte las redes sociales de Black Tibii en un Embed.
-- `/clear`: elimina mensajes recientes de un canal.
-- `/slowmode`: configura el modo lento de un canal.
-- `/cumpleaños`: registra fechas de nacimiento y configura avisos automáticos.
+Odinus cuenta actualmente con sistemas para:
+
+* Administración de canales y mensajes.
+* Publicación de mensajes mediante canales seleccionados.
+* Perfiles visuales de miembros.
+* Sistema de niveles y experiencia.
+* Recompensas por nivel mediante roles.
+* Registro y seguimiento de cumpleaños.
+* Seguimiento automático de invitaciones.
+* Autoroles de países.
+* Autoroles de edad.
+* Centro de anuncios para plataformas externas.
+* Consulta de redes sociales de Black Tibii.
+
+## Comandos
+
+### 👤 Comandos para usuarios
+
+Estos comandos están disponibles para los miembros del servidor según las
+restricciones propias de cada sistema.
+
+* `/ping` — Comprueba que Odinus está activo.
+* `/ayuda` — Muestra los comandos disponibles.
+* `/redes` — Muestra las redes sociales de Black Tibii.
+* `/perfil [usuario]` — Muestra el perfil visual de un miembro.
+* `/nivel [usuario]` — Consulta el nivel, experiencia y progreso de un miembro.
+* `/cumpleaños registrar` — Registra una fecha de cumpleaños.
+* `/cumpleaños lista` — Consulta los cumpleaños registrados del servidor.
+
+Los sistemas de autoroles de **país** y **edad** son utilizados por los miembros
+mediante los botones publicados por los administradores.
+
+### 🛠️ Comandos para administradores
+
+Estos comandos requieren permisos administrativos o los permisos específicos
+indicados por cada sistema.
+
+#### Administración
+
+* `/publicar` — Publica un mensaje en un canal seleccionado.
+* `/clear` — Elimina mensajes recientes del canal.
+* `/slowmode` — Configura el modo lento de un canal.
+
+#### Cumpleaños
+
+* `/cumpleaños configurar_canal` — Configura el canal donde se publicarán los avisos de cumpleaños.
+
+#### Invitaciones
+
+* `/invitaciones configurar_canal` — Configura el canal para el seguimiento de invitaciones y entradas de miembros.
+
+#### Autoroles
+
+* `/paises` — Configura y publica el selector de autoroles de países.
+* `/edad` — Configura y publica el selector de autoroles de edad.
+
+Los miembros seleccionan sus roles directamente mediante los botones publicados
+por estos sistemas.
+
+#### Niveles
+
+* `/niveles activar` — Activa la obtención automática de experiencia.
+* `/niveles desactivar` — Desactiva la obtención automática de experiencia.
+* `/nivel_administrar` — Abre el panel para administrar manualmente el nivel y la experiencia de un miembro.
+
+#### Recompensas
+
+* `/recompensa añadir` — Añade una recompensa de nivel.
+* `/recompensa editar` — Edita una recompensa de nivel.
+* `/recompensa eliminar` — Elimina una recompensa configurada.
+* `/recompensa lista` — Muestra las recompensas configuradas.
+
+Las recompensas utilizan roles de Discord y se sincronizan automáticamente
+con los cambios de nivel.
+
+#### Centro de anuncios
+
+* `/anuncios configurar` — Configura una plataforma y su canal de anuncios.
+* `/anuncios activar` — Activa una plataforma de anuncios.
+* `/anuncios desactivar` — Desactiva una plataforma de anuncios.
+* `/anuncios comprobar` — Realiza una comprobación manual de una integración.
+* `/anuncios estado` — Muestra el estado de las plataformas configuradas.
+
+## Sistemas automáticos
+
+### 🎂 Cumpleaños
+
+Odinus puede publicar automáticamente los cumpleaños registrados en el canal
+configurado. Los avisos se procesan diariamente a medianoche utilizando la
+zona horaria de Ciudad de México.
+
+### 📩 Invitaciones
+
+Odinus mantiene un seguimiento de las invitaciones del servidor.
+
+El sistema registra las invitaciones, detecta las entradas de nuevos miembros
+cuando es posible identificar la invitación utilizada y mantiene estadísticas
+persistentes de invitaciones por usuario.
+
+### ⭐ Niveles
+
+Cuando el sistema está activado, los mensajes de los miembros pueden generar
+experiencia automáticamente.
+
+Al alcanzar nuevos niveles, Odinus puede anunciar el ascenso y sincronizar las
+recompensas configuradas para ese nivel.
+
+### 🏆 Recompensas
+
+Las recompensas de nivel están asociadas a roles de Discord. Cuando un miembro
+cambia de nivel, Odinus sincroniza automáticamente los roles correspondientes.
+
+## Centro de anuncios
+
+El Centro de anuncios permite detectar nuevas publicaciones y generar anuncios
+automáticos en Discord.
+
+### Plataformas activas
+
+* YouTube
+* Twitch
+* Instagram
+* Facebook
+* Spotify
+
+Cada integración puede utilizar su propia configuración de canal y mantiene
+protección contra anuncios duplicados.
+
+### Integraciones pendientes
+
+* `ServerMinecraft` — nombre temporal reservado para la futura integración con el servidor de Minecraft.
+* BlackTibii.com — integración futura con el sitio web de Black Tibii.
 
 ## Vista previa
 
@@ -35,13 +160,15 @@ ampliar sus capacidades progresivamente desde un solo lugar.
 ## Ecosistema Odin
 
 Odinus forma parte de la visión de **0D1N SOFTWARE** de desarrollar herramientas
-propias, modulares y conectadas entre sí. A medida que evolucione, incorporará
-nuevas automatizaciones e integraciones para comunidades de Discord.
+propias, modulares y conectadas entre sí.
+
+La arquitectura del proyecto está diseñada para incorporar progresivamente
+nuevas automatizaciones, servicios e integraciones.
 
 ## Desarrollo
 
 Odinus se encuentra en desarrollo activo. Este repositorio documenta su evolución
-a medida que se incorporan nuevas capacidades.
+y las capacidades incorporadas al proyecto.
 
 ---
 

@@ -23,10 +23,8 @@ LOGGER = logging.getLogger(__name__)
 PLATFORM_LABELS = {
     "facebook": "Facebook",
     "instagram": "Instagram",
-    "tiktok": "TikTok",
     "twitch": "Twitch",
     "youtube": "YouTube",
-    "twitter": "X / Twitter",
     "spotify": "Spotify",
     "ServerMinecraft": "ServerMinecraft",
 }
