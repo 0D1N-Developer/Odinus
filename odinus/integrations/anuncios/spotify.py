@@ -317,7 +317,6 @@ class SpotifyIntegration(AnnouncementIntegration):
         """Get the artist's albums and singles."""
         params = {
             "include_groups": "album,single",
-            "limit": "20",
             "market": "MX",
         }
 
@@ -357,7 +356,6 @@ class SpotifyIntegration(AnnouncementIntegration):
     ) -> list[dict] | None:
         """Get every track from a Spotify release."""
         params = {
-            "limit": "50",
             "market": "MX",
         }
 
@@ -420,8 +418,11 @@ class SpotifyIntegration(AnnouncementIntegration):
 
                     if response.status != 200:
                         LOGGER.error(
-                            "Spotify API error %s: %s",
+                            "Spotify API error %s on %s "
+                            "with params %s: %s",
                             response.status,
+                            endpoint,
+                            params,
                             payload,
                         )
                         return None

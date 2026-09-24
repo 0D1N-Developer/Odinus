@@ -28,6 +28,7 @@ class OdinusBot(commands.Bot):
         await self.load_extension("odinus.cogs.recompensas")
         await self.load_extension("odinus.cogs.perfil")
         await self.load_extension("odinus.cogs.anuncios")
+        await self.load_extension("odinus.cogs.server")
 
         synced_commands = await self.tree.sync()
 
@@ -41,6 +42,7 @@ def create_bot() -> OdinusBot:
     """Build the bot with the intents needed by this version."""
     intents = discord.Intents.default()
     intents.members = True
+    intents.presences = True
     intents.message_content = True
 
     return OdinusBot(

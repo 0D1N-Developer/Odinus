@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from urllib.parse import urljoin
 
 import aiohttp
 
@@ -16,13 +17,14 @@ from odinus.integrations.anuncios.base import (
 LOGGER = logging.getLogger(__name__)
 
 FACEBOOK_API_BASE = "https://graph.facebook.com"
+FACEBOOK_WEB_BASE = "https://www.facebook.com"
 FACEBOOK_ICON_URL = (
     "https://cdn.simpleicons.org/facebook/1877F2"
 )
 
 
 class FacebookIntegration(AnnouncementIntegration):
-    """Discover new Facebook posts and Reels."""
+    """Discover new Facebook posts, Reels and videos."""
 
     platform = "facebook"
 
@@ -35,7 +37,7 @@ class FacebookIntegration(AnnouncementIntegration):
     async def fetch_events(
         self,
     ) -> list[AnnouncementEvent]:
-        """Return the latest Facebook posts and Reels."""
+        """Return the latest Facebook posts, Reels and videos."""
         page = await self._get_page()
 
         if page is None:
@@ -53,11 +55,22 @@ class FacebookIntegration(AnnouncementIntegration):
 
         events: list[AnnouncementEvent] = []
 
+        # Prevent the same Facebook object from being returned
+        # twice when it appears in both /posts and /videos.
+        seen_ids: set[str] = set()
+
         for item in posts:
-            external_id = item.get("id")
+            external_id = self._build_external_id(
+                item.get("id")
+            )
 
             if not external_id:
                 continue
+
+            if external_id in seen_ids:
+                continue
+
+            seen_ids.add(external_id)
 
             post_image_url = (
                 item.get("full_picture")
@@ -73,43 +86,39 @@ class FacebookIntegration(AnnouncementIntegration):
                         "Black Tibii publicó una "
                         "nueva publicación."
                     ),
-                    url=item.get("permalink_url"),
+                    url=self._normalize_facebook_url(
+                        item.get("permalink_url")
+                    ),
                     description=item.get("message"),
-                    # Miniatura grande.
                     thumbnail_url=post_image_url,
-                    # Imagen cuadrada superior.
                     image_url=(
                         profile_picture_url or None
                     ),
                     published_at=item.get(
                         "created_time"
                     ),
-                    # Avatar circular.
                     author_name=page["name"],
                     author_icon_url=(
                         profile_picture_url or None
                     ),
-                    # Logo de Facebook.
                     platform_icon_url=(
                         FACEBOOK_ICON_URL
                     ),
                 )
             )
 
-        post_ids = {
-            str(item.get("id"))
-            for item in posts
-            if item.get("id")
-        }
-
         for item in videos:
-            external_id = item.get("id")
+            external_id = self._build_external_id(
+                item.get("id")
+            )
 
             if not external_id:
                 continue
 
-            if external_id in post_ids:
+            if external_id in seen_ids:
                 continue
+
+            seen_ids.add(external_id)
 
             event_type = self._detect_video_type(
                 item
@@ -123,27 +132,25 @@ class FacebookIntegration(AnnouncementIntegration):
                     title=self._build_title(
                         event_type
                     ),
-                    url=item.get("permalink_url"),
+                    url=self._normalize_facebook_url(
+                        item.get("permalink_url")
+                    ),
                     description=item.get(
                         "description"
                     ),
-                    # Miniatura grande.
                     thumbnail_url=(
                         item.get("thumbnail_url")
                     ),
-                    # Imagen cuadrada superior.
                     image_url=(
                         profile_picture_url or None
                     ),
                     published_at=item.get(
                         "created_time"
                     ),
-                    # Avatar circular.
                     author_name=page["name"],
                     author_icon_url=(
                         profile_picture_url or None
                     ),
-                    # Logo de Facebook.
                     platform_icon_url=(
                         FACEBOOK_ICON_URL
                     ),
@@ -347,6 +354,53 @@ class FacebookIntegration(AnnouncementIntegration):
         return videos
 
     @staticmethod
+    def _build_external_id(
+        value: str | None,
+    ) -> str | None:
+        """Return the original stable Facebook object ID."""
+        if not value:
+            return None
+
+        external_id = str(value).strip()
+
+        if not external_id:
+            return None
+
+        return external_id
+
+    @staticmethod
+    def _normalize_facebook_url(
+        value: str | None,
+    ) -> str | None:
+        """Convert Facebook relative URLs to absolute URLs."""
+        if not value:
+            return None
+
+        url = str(value).strip()
+
+        if not url:
+            return None
+
+        if url.startswith(
+            (
+                "http://",
+                "https://",
+            )
+        ):
+            return url
+
+        if url.startswith("/"):
+            return urljoin(
+                FACEBOOK_WEB_BASE,
+                url,
+            )
+
+        return urljoin(
+            f"{FACEBOOK_WEB_BASE}/",
+            url,
+        )
+
+    @staticmethod
     def _extract_attachment_image(
         item: dict,
     ) -> str | None:
@@ -416,7 +470,14 @@ class FacebookIntegration(AnnouncementIntegration):
     def _detect_video_type(
         item: dict[str, str | None],
     ) -> str:
-        """Determine whether a Facebook video is a Reel."""
+        """
+        Determine the video announcement type.
+
+        The current Meta response does not provide enough
+        reliable information for a definitive Story/Reel
+        distinction, so videos with media data continue to
+        use the existing Reel classification.
+        """
         source = str(
             item.get("source") or ""
         )
@@ -425,9 +486,6 @@ class FacebookIntegration(AnnouncementIntegration):
             item.get("thumbnail_url") or ""
         )
 
-        # Facebook Reels are normally vertical.
-        # The API response currently used by Black Tibii
-        # provides the video source and thumbnail.
         if source or thumbnail_url:
             return "reel"
 
@@ -439,9 +497,13 @@ class FacebookIntegration(AnnouncementIntegration):
     ) -> str:
         """Build the announcement title."""
         if event_type == "reel":
-            return "Black Tibii publicó un nuevo Reel."
+            return (
+                "Black Tibii publicó un nuevo Reel."
+            )
 
-        return "Black Tibii publicó un nuevo video."
+        return (
+            "Black Tibii publicó un nuevo video."
+        )
 
     async def _request(
         self,
