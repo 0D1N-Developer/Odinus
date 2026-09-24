@@ -29,6 +29,11 @@ class Settings:
     facebook_page_access_token: str
     facebook_poll_interval: int
 
+    spotify_client_id: str
+    spotify_client_secret: str
+    spotify_artist_id: str
+    spotify_poll_interval: int
+
 
 def load_settings() -> Settings:
     """Load and validate settings from the local environment."""
@@ -84,6 +89,21 @@ def load_settings() -> Settings:
         "",
     ).strip()
 
+    spotify_client_id = os.getenv(
+        "SPOTIFY_CLIENT_ID",
+        "",
+    ).strip()
+
+    spotify_client_secret = os.getenv(
+        "SPOTIFY_CLIENT_SECRET",
+        "",
+    ).strip()
+
+    spotify_artist_id = os.getenv(
+        "SPOTIFY_ARTIST_ID",
+        "",
+    ).strip()
+
     youtube_poll_interval_raw = os.getenv(
         "YOUTUBE_POLL_INTERVAL",
         "300",
@@ -101,6 +121,11 @@ def load_settings() -> Settings:
 
     facebook_poll_interval_raw = os.getenv(
         "FACEBOOK_POLL_INTERVAL",
+        "300",
+    ).strip()
+
+    spotify_poll_interval_raw = os.getenv(
+        "SPOTIFY_POLL_INTERVAL",
         "300",
     ).strip()
 
@@ -164,6 +189,24 @@ def load_settings() -> Settings:
             "Add your Facebook Page access token to the .env file."
         )
 
+    if not spotify_client_id:
+        raise RuntimeError(
+            "SPOTIFY_CLIENT_ID is not configured. "
+            "Add your Spotify client ID to the .env file."
+        )
+
+    if not spotify_client_secret:
+        raise RuntimeError(
+            "SPOTIFY_CLIENT_SECRET is not configured. "
+            "Add your Spotify client secret to the .env file."
+        )
+
+    if not spotify_artist_id:
+        raise RuntimeError(
+            "SPOTIFY_ARTIST_ID is not configured. "
+            "Add your Spotify artist ID to the .env file."
+        )
+
     try:
         youtube_poll_interval = int(
             youtube_poll_interval_raw
@@ -224,6 +267,21 @@ def load_settings() -> Settings:
             "FACEBOOK_POLL_INTERVAL must be greater than 0."
         )
 
+    try:
+        spotify_poll_interval = int(
+            spotify_poll_interval_raw
+        )
+    except ValueError as error:
+        raise RuntimeError(
+            "SPOTIFY_POLL_INTERVAL must be a valid integer "
+            "in seconds."
+        ) from error
+
+    if spotify_poll_interval <= 0:
+        raise RuntimeError(
+            "SPOTIFY_POLL_INTERVAL must be greater than 0."
+        )
+
     return Settings(
         discord_token=token,
         youtube_api_key=youtube_api_key,
@@ -239,4 +297,8 @@ def load_settings() -> Settings:
         facebook_page_id=facebook_page_id,
         facebook_page_access_token=facebook_page_access_token,
         facebook_poll_interval=facebook_poll_interval,
+        spotify_client_id=spotify_client_id,
+        spotify_client_secret=spotify_client_secret,
+        spotify_artist_id=spotify_artist_id,
+        spotify_poll_interval=spotify_poll_interval,
     )

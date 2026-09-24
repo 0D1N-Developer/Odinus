@@ -15,6 +15,7 @@ import discord
 from odinus.integrations.anuncios.base import AnnouncementEvent
 from odinus.integrations.anuncios.facebook import FacebookIntegration
 from odinus.integrations.anuncios.instagram import InstagramIntegration
+from odinus.integrations.anuncios.spotify import SpotifyIntegration
 from odinus.integrations.anuncios.twitch import TwitchIntegration
 from odinus.integrations.anuncios.youtube import YouTubeIntegration
 
@@ -325,6 +326,7 @@ class AnnouncementService:
         self.twitch = TwitchIntegration(settings)
         self.instagram = InstagramIntegration(settings)
         self.facebook = FacebookIntegration(settings)
+        self.spotify = SpotifyIntegration(settings)
 
     async def poll_youtube(self) -> None:
         """Check YouTube and publish new events to configured guilds."""
@@ -443,6 +445,38 @@ class AnnouncementService:
             config = self.repository.get_config(
                 guild.id,
                 "facebook",
+            )
+
+            if config is None or not config.enabled:
+                continue
+
+            await self._process_guild_events(
+                guild,
+                config,
+                events,
+            )
+
+    async def poll_spotify(self) -> None:
+        """Check Spotify and publish new releases."""
+        try:
+            events = await self.spotify.fetch_events()
+
+        except Exception:
+            LOGGER.exception(
+                "Unexpected error while polling Spotify."
+            )
+            return
+
+        if not events:
+            LOGGER.info(
+                "Spotify polling completed: no events found."
+            )
+            return
+
+        for guild in self.bot.guilds:
+            config = self.repository.get_config(
+                guild.id,
+                "spotify",
             )
 
             if config is None or not config.enabled:
@@ -592,6 +626,37 @@ class AnnouncementService:
             action_text = "Ver en Facebook"
             embed_color = discord.Color.blue()
 
+        elif platform == "spotify":
+            platform_name = "Spotify"
+            announcement_text = (
+                f"{author_name} lanzó nueva música!"
+            )
+
+            if event.event_type == "single":
+                embed_description = (
+                    f"{author_name} lanzó un nuevo "
+                    "sencillo en Spotify."
+                )
+
+            elif event.event_type == "ep":
+                embed_description = (
+                    f"{author_name} lanzó un nuevo "
+                    "EP en Spotify."
+                )
+
+            else:
+                embed_description = (
+                    f"{author_name} lanzó un nuevo "
+                    "álbum en Spotify."
+                )
+
+            action_text = "Escuchar en Spotify"
+            embed_color = discord.Color.from_rgb(
+                29,
+                185,
+                84,
+            )
+
         else:
             platform_name = "YouTube"
             announcement_text = (
@@ -739,36 +804,12 @@ class AnnouncementService:
         )
 
         # IMAGEN CUADRADA ARRIBA A LA DERECHA.
-        #
-        # YouTube:
-        #   Foto de perfil del canal.
-        #
-        # Twitch:
-        #   Portada/categoría del juego.
-        #
-        # Instagram:
-        #   Foto de perfil de la cuenta.
-        #
-        # Facebook:
-        #   Foto de perfil de la página.
         if event.image_url:
             embed.set_thumbnail(
                 url=event.image_url
             )
 
         # MINIATURA GRANDE ABAJO.
-        #
-        # YouTube:
-        #   Miniatura del video.
-        #
-        # Twitch:
-        #   Miniatura del stream.
-        #
-        # Instagram:
-        #   Imagen o miniatura del post/Reel.
-        #
-        # Facebook:
-        #   Imagen o miniatura de la publicación/Reel.
         if event.thumbnail_url:
             embed.set_image(
                 url=event.thumbnail_url
@@ -778,37 +819,52 @@ class AnnouncementService:
 
         if event.published_at:
             try:
-                published_at = datetime.fromisoformat(
-                    event.published_at.replace(
-                        "Z",
-                        "+00:00",
+                # Spotify proporciona la fecha de lanzamiento,
+                # pero no una hora exacta de publicación.
+                if platform_name == "Spotify":
+                    release_date = event.published_at[:10]
+
+                    published_at = datetime.fromisoformat(
+                        release_date
                     )
-                )
 
-                published_at = published_at.astimezone(
-                    MEXICO_TIMEZONE
-                )
-
-                hour = published_at.strftime(
-                    "%I:%M %p"
-                )
-
-                hour = (
-                    hour.replace(
-                        "AM",
-                        "a. m.",
+                    footer_text = (
+                        f"{platform_name} • "
+                        f"{published_at.strftime('%d/%m/%Y')}"
                     )
-                    .replace(
-                        "PM",
-                        "p. m.",
-                    )
-                )
 
-                footer_text = (
-                    f"{platform_name} • "
-                    f"{published_at.strftime('%d/%m/%Y')} "
-                    f"{hour}"
-                )
+                else:
+                    published_at = datetime.fromisoformat(
+                        event.published_at.replace(
+                            "Z",
+                            "+00:00",
+                        )
+                    )
+
+                    published_at = published_at.astimezone(
+                        MEXICO_TIMEZONE
+                    )
+
+                    hour = published_at.strftime(
+                        "%I:%M %p"
+                    )
+
+                    hour = (
+                        hour.replace(
+                            "AM",
+                            "a. m.",
+                        )
+                        .replace(
+                            "PM",
+                            "p. m.",
+                        )
+                    )
+
+                    footer_text = (
+                        f"{platform_name} • "
+                        f"{published_at.strftime('%d/%m/%Y')} "
+                        f"{hour}"
+                    )
 
             except ValueError:
                 LOGGER.warning(
