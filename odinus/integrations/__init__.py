@@ -1,5 +1,5 @@
-"""Future outbound publishing integrations live in this package.
+﻿"""Reserved package for future Odinus integrations.
 
-Planned providers include Facebook, Instagram, TikTok, YouTube, Twitch, and X.
-No external provider is configured or invoked in this version.
+Future integrations will focus on Odin Software services,
+Minecraft, and BlackTibii.com.
 """

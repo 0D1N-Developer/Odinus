@@ -1,4 +1,4 @@
-"""General slash commands for Odinus."""
+﻿"""General slash commands for Odinus."""
 
 from datetime import timedelta
 
@@ -128,7 +128,10 @@ class GeneralCog(commands.Cog):
         name="ayuda",
         description="Muestra los comandos disponibles.",
     )
-    async def ayuda(self, interaction: discord.Interaction) -> None:
+    async def ayuda(
+        self,
+        interaction: discord.Interaction,
+    ) -> None:
         """Show the commands available to the current user."""
         is_admin = (
             interaction.guild is not None
@@ -164,17 +167,17 @@ class GeneralCog(commands.Cog):
             "`/recompensa editar` — Edita una recompensa por nivel.\n"
             "`/recompensa eliminar` — Elimina una recompensa por nivel.\n"
             "`/recompensa lista` — Muestra las recompensas configuradas.\n"
-            "`/anuncios configurar` — Configura una plataforma y su canal de anuncios.\n"
-            "`/anuncios activar` — Activa una plataforma de anuncios.\n"
-            "`/anuncios desactivar` — Desactiva una plataforma de anuncios.\n"
-            "`/anuncios comprobar` — Comprueba manualmente una integración.\n"
-            "`/anuncios estado` — Muestra el estado de las plataformas configuradas."
+            "`/anuncios configurar` — Configura una fuente y su canal de anuncios.\n"
+            "`/anuncios activar` — Activa una fuente de anuncios.\n"
+            "`/anuncios desactivar` — Desactiva una fuente de anuncios.\n"
+            "`/anuncios comprobar` — Comprueba la configuración de una fuente.\n"
+            "`/anuncios estado` — Muestra el estado de las fuentes configuradas."
         )
 
         announcement_info = (
             "\n\n"
             "**📢 Centro de anuncios**\n"
-            "YouTube • Twitch • Instagram • Facebook • Spotify"
+            "Minecraft • BlackTibii.com"
         )
 
         if is_admin:

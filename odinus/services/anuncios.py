@@ -1,4 +1,4 @@
-"""Persistence and announcement services for Odinus."""
+﻿"""Persistence and generic announcement services for Odinus."""
 
 from __future__ import annotations
 
@@ -12,27 +12,36 @@ from zoneinfo import ZoneInfo
 
 import discord
 
-from odinus.integrations.anuncios.base import AnnouncementEvent
-from odinus.integrations.anuncios.facebook import FacebookIntegration
-from odinus.integrations.anuncios.instagram import InstagramIntegration
-from odinus.integrations.anuncios.spotify import SpotifyIntegration
-from odinus.integrations.anuncios.twitch import TwitchIntegration
-from odinus.integrations.anuncios.youtube import YouTubeIntegration
-
 if TYPE_CHECKING:
-    from odinus.config import Settings
+    from discord.ext.commands import Bot
 
 
 LOGGER = logging.getLogger(__name__)
 
-MEXICO_TIMEZONE = ZoneInfo(
-    "America/Mexico_City"
-)
+MEXICO_TIMEZONE = ZoneInfo("America/Mexico_City")
+
+
+@dataclass(frozen=True)
+class AnnouncementEvent:
+    """Generic event that can be published by the announcement center."""
+
+    platform: str
+    external_id: str
+    event_type: str
+    title: str
+    url: str | None = None
+    description: str | None = None
+    published_at: str | None = None
+    author_name: str | None = None
+    author_icon_url: str | None = None
+    image_url: str | None = None
+    thumbnail_url: str | None = None
+    platform_icon_url: str | None = None
 
 
 @dataclass(frozen=True)
 class AnnouncementConfig:
-    """Configuration for one announcement integration."""
+    """Configuration for one announcement source."""
 
     guild_id: int
     platform: str
@@ -42,7 +51,7 @@ class AnnouncementConfig:
 
 
 class AnnouncementRepository:
-    """Own persistent data used by the announcement center."""
+    """Persistent data used by the announcement center."""
 
     def __init__(
         self,
@@ -95,7 +104,7 @@ class AnnouncementRepository:
         channel_id: int,
         mention_role_id: int | None,
     ) -> None:
-        """Create or replace a platform configuration."""
+        """Create or update a platform configuration."""
         with self._connect() as connection:
             connection.execute(
                 """
@@ -124,7 +133,7 @@ class AnnouncementRepository:
         guild_id: int,
         platform: str,
     ) -> AnnouncementConfig | None:
-        """Return a platform configuration."""
+        """Return one platform configuration."""
         with self._connect() as connection:
             row = connection.execute(
                 """
@@ -162,7 +171,7 @@ class AnnouncementRepository:
         self,
         guild_id: int,
     ) -> list[AnnouncementConfig]:
-        """Return every configured integration for a guild."""
+        """Return all configured announcement sources."""
         with self._connect() as connection:
             rows = connection.execute(
                 """
@@ -200,7 +209,7 @@ class AnnouncementRepository:
         platform: str,
         enabled: bool,
     ) -> bool:
-        """Enable or disable a configured integration."""
+        """Enable or disable an announcement source."""
         with self._connect() as connection:
             cursor = connection.execute(
                 """
@@ -223,7 +232,7 @@ class AnnouncementRepository:
         platform: str,
         external_id: str,
     ) -> bool:
-        """Return whether an external event was already processed."""
+        """Return whether an event has already been processed."""
         with self._connect() as connection:
             row = connection.execute(
                 """
@@ -249,7 +258,7 @@ class AnnouncementRepository:
         guild_id: int,
         platform: str,
     ) -> bool:
-        """Return whether the guild already has event history."""
+        """Return whether a source already has event history."""
         with self._connect() as connection:
             row = connection.execute(
                 """
@@ -277,7 +286,7 @@ class AnnouncementRepository:
         published_at: str | None,
         discord_message_id: int | None,
     ) -> None:
-        """Record an announcement event as processed."""
+        """Record an announcement event."""
         with self._connect() as connection:
             connection.execute(
                 """
@@ -310,248 +319,67 @@ class AnnouncementRepository:
 
 
 class AnnouncementService:
-    """Coordinate external integrations and Discord announcements."""
+    """Publish generic announcement events to Discord."""
 
     def __init__(
         self,
-        bot: discord.Client,
-        settings: Settings,
+        bot: Bot,
         repository: AnnouncementRepository,
     ) -> None:
         self.bot = bot
-        self.settings = settings
         self.repository = repository
 
-        self.youtube = YouTubeIntegration(settings)
-        self.twitch = TwitchIntegration(settings)
-        self.instagram = InstagramIntegration(settings)
-        self.facebook = FacebookIntegration(settings)
-        self.spotify = SpotifyIntegration(settings)
-
-    async def poll_youtube(self) -> None:
-        """Check YouTube and publish new events to configured guilds."""
-        try:
-            events = await self.youtube.fetch_events()
-
-        except Exception:
-            LOGGER.exception(
-                "Unexpected error while polling YouTube."
-            )
-            return
-
-        if not events:
-            LOGGER.info(
-                "YouTube polling completed: no events found."
-            )
-            return
-
-        for guild in self.bot.guilds:
-            config = self.repository.get_config(
-                guild.id,
-                "youtube",
-            )
-
-            if config is None or not config.enabled:
-                continue
-
-            await self._process_guild_events(
-                guild,
-                config,
-                events,
-            )
-
-    async def poll_twitch(self) -> None:
-        """Check Twitch and publish new live events to configured guilds."""
-        try:
-            events = await self.twitch.fetch_events()
-
-        except Exception:
-            LOGGER.exception(
-                "Unexpected error while polling Twitch."
-            )
-            return
-
-        if not events:
-            LOGGER.info(
-                "Twitch polling completed: no events found."
-            )
-            return
-
-        for guild in self.bot.guilds:
-            config = self.repository.get_config(
-                guild.id,
-                "twitch",
-            )
-
-            if config is None or not config.enabled:
-                continue
-
-            await self._process_guild_events(
-                guild,
-                config,
-                events,
-            )
-
-    async def poll_instagram(self) -> None:
-        """Check Instagram and publish new posts and Reels."""
-        try:
-            events = await self.instagram.fetch_events()
-
-        except Exception:
-            LOGGER.exception(
-                "Unexpected error while polling Instagram."
-            )
-            return
-
-        if not events:
-            LOGGER.info(
-                "Instagram polling completed: no events found."
-            )
-            return
-
-        for guild in self.bot.guilds:
-            config = self.repository.get_config(
-                guild.id,
-                "instagram",
-            )
-
-            if config is None or not config.enabled:
-                continue
-
-            await self._process_guild_events(
-                guild,
-                config,
-                events,
-            )
-
-    async def poll_facebook(self) -> None:
-        """Check Facebook and publish new posts and Reels."""
-        try:
-            events = await self.facebook.fetch_events()
-
-        except Exception:
-            LOGGER.exception(
-                "Unexpected error while polling Facebook."
-            )
-            return
-
-        if not events:
-            LOGGER.info(
-                "Facebook polling completed: no events found."
-            )
-            return
-
-        for guild in self.bot.guilds:
-            config = self.repository.get_config(
-                guild.id,
-                "facebook",
-            )
-
-            if config is None or not config.enabled:
-                continue
-
-            await self._process_guild_events(
-                guild,
-                config,
-                events,
-            )
-
-    async def poll_spotify(self) -> None:
-        """Check Spotify and publish new releases."""
-        try:
-            events = await self.spotify.fetch_events()
-
-        except Exception:
-            LOGGER.exception(
-                "Unexpected error while polling Spotify."
-            )
-            return
-
-        if not events:
-            LOGGER.info(
-                "Spotify polling completed: no events found."
-            )
-            return
-
-        for guild in self.bot.guilds:
-            config = self.repository.get_config(
-                guild.id,
-                "spotify",
-            )
-
-            if config is None or not config.enabled:
-                continue
-
-            await self._process_guild_events(
-                guild,
-                config,
-                events,
-            )
-
-    async def _process_guild_events(
+    async def publish_event(
         self,
         guild: discord.Guild,
-        config: AnnouncementConfig,
-        events: list[AnnouncementEvent],
-    ) -> None:
-        """Process events for one configured announcement platform."""
-        channel = guild.get_channel(
-            config.channel_id
-        )
-
-        if channel is None:
-            LOGGER.warning(
-                "Announcement channel %s not found in guild %s.",
-                config.channel_id,
-                guild.id,
-            )
-            return
-
-        if not isinstance(
-            channel,
-            discord.TextChannel,
-        ):
-            LOGGER.warning(
-                "Configured announcement channel %s in guild %s "
-                "is not a text channel.",
-                config.channel_id,
-                guild.id,
-            )
-            return
-
-        has_history = self.repository.has_events(
+        event: AnnouncementEvent,
+    ) -> bool:
+        """Publish an event using the guild configuration."""
+        config = self.repository.get_config(
             guild.id,
-            config.platform,
+            event.platform,
         )
 
-        for event in reversed(events):
-            if self.repository.event_exists(
+        if config is None or not config.enabled:
+            return False
+
+        channel = guild.get_channel(config.channel_id)
+
+        if not isinstance(channel, discord.TextChannel):
+            LOGGER.warning(
+                "Announcement channel %s not found or is not a text channel "
+                "in guild %s.",
+                config.channel_id,
                 guild.id,
-                event.platform,
-                event.external_id,
-            ):
-                continue
-
-            if not has_history:
-                self.repository.record_event(
-                    guild_id=guild.id,
-                    platform=event.platform,
-                    external_id=event.external_id,
-                    event_type=event.event_type,
-                    title=event.title,
-                    url=event.url,
-                    published_at=event.published_at,
-                    discord_message_id=None,
-                )
-
-                continue
-
-            await self._publish_event(
-                guild,
-                channel,
-                config,
-                event,
             )
+            return False
+
+        if self.repository.event_exists(
+            guild.id,
+            event.platform,
+            event.external_id,
+        ):
+            return False
+
+        return await self._publish_event(
+            guild,
+            channel,
+            config,
+            event,
+        )
+
+    async def publish_to_all_guilds(
+        self,
+        event: AnnouncementEvent,
+    ) -> int:
+        """Publish an event to every configured guild."""
+        published = 0
+
+        for guild in self.bot.guilds:
+            if await self.publish_event(guild, event):
+                published += 1
+
+        return published
 
     async def _publish_event(
         self,
@@ -559,161 +387,59 @@ class AnnouncementService:
         channel: discord.TextChannel,
         config: AnnouncementConfig,
         event: AnnouncementEvent,
-    ) -> None:
-        """Publish one external event to Discord."""
-        author_name = (
-            event.author_name
-            or "Black Tibii"
+    ) -> bool:
+        """Publish one event to one Discord channel."""
+        author_name = event.author_name or "Odinus"
+
+        platform_name = {
+            "minecraft": "Minecraft",
+            "blacktibii": "BlackTibii.com",
+        }.get(
+            event.platform,
+            event.platform,
         )
 
-        platform = event.platform
-
-        if platform == "twitch":
-            platform_name = "Twitch"
-            announcement_text = (
-                f"{author_name} está en directo!"
-            )
-            action_text = "Ver en Twitch"
-            embed_description = (
-                f"{author_name} está en directo "
-                "en Twitch."
-            )
-            embed_color = discord.Color.purple()
-
-        elif platform == "instagram":
-            platform_name = "Instagram"
-
-            if event.event_type == "reel":
-                announcement_text = (
-                    f"{author_name} publicó un nuevo Reel!"
-                )
-                embed_description = (
-                    f"{author_name} publicó un nuevo Reel "
-                    "en Instagram."
-                )
-            else:
-                announcement_text = (
-                    f"{author_name} publicó una nueva publicación!"
-                )
-                embed_description = (
-                    f"{author_name} publicó una nueva "
-                    "publicación en Instagram."
-                )
-
-            action_text = "Ver en Instagram"
-            embed_color = discord.Color.magenta()
-
-        elif platform == "facebook":
-            platform_name = "Facebook"
-
-            if event.event_type == "reel":
-                announcement_text = (
-                    f"{author_name} publicó un nuevo Reel!"
-                )
-                embed_description = (
-                    f"{author_name} publicó un nuevo Reel "
-                    "en Facebook."
-                )
-            else:
-                announcement_text = (
-                    f"{author_name} publicó una nueva publicación!"
-                )
-                embed_description = (
-                    f"{author_name} publicó una nueva "
-                    "publicación en Facebook."
-                )
-
-            action_text = "Ver en Facebook"
-            embed_color = discord.Color.blue()
-
-        elif platform == "spotify":
-            platform_name = "Spotify"
-            announcement_text = (
-                f"{author_name} lanzó nueva música!"
-            )
-
-            if event.event_type == "single":
-                embed_description = (
-                    f"{author_name} lanzó un nuevo "
-                    "sencillo en Spotify."
-                )
-
-            elif event.event_type == "ep":
-                embed_description = (
-                    f"{author_name} lanzó un nuevo "
-                    "EP en Spotify."
-                )
-
-            else:
-                embed_description = (
-                    f"{author_name} lanzó un nuevo "
-                    "álbum en Spotify."
-                )
-
-            action_text = "Escuchar en Spotify"
-            embed_color = discord.Color.from_rgb(
-                29,
-                185,
-                84,
-            )
-
-        else:
-            platform_name = "YouTube"
-            announcement_text = (
-                f"{author_name} ha subido un nuevo video!"
-            )
-            action_text = "Ver en YouTube"
-            embed_description = (
-                f"{author_name} publicó un nuevo video "
-                "en YouTube."
-            )
-            embed_color = discord.Color.red()
+        announcement_text = self._announcement_text(
+            event,
+            author_name,
+            platform_name,
+        )
 
         content_lines: list[str] = []
 
         if config.mention_role_id is not None:
-            role = guild.get_role(
-                config.mention_role_id
-            )
+            role = guild.get_role(config.mention_role_id)
 
             if role is not None:
                 content_lines.append(
-                    f"{role.mention} 💀 "
-                    f"{announcement_text}"
+                    f"{role.mention} 💀 {announcement_text}"
                 )
             else:
                 content_lines.append(
-                    f"@here 💀 "
-                    f"{announcement_text}"
+                    f"@here 💀 {announcement_text}"
                 )
         else:
             content_lines.append(
-                f"@here 💀 "
-                f"{announcement_text}"
+                f"@here 💀 {announcement_text}"
             )
 
-        content_lines.extend(
-            [
-                "",
-                event.title,
-                "",
-                (
-                    f"🔗 [{action_text}]"
-                    f"({event.url})"
-                ),
-            ]
-        )
+        content_lines.append("")
+        content_lines.append(event.title)
 
-        content = "\n".join(
-            content_lines
-        )
+        if event.url:
+            content_lines.extend(
+                [
+                    "",
+                    f"🔗 [Ver más]({event.url})",
+                ]
+            )
+
+        content = "\n".join(content_lines)
 
         embed = self._build_embed(
             event,
             author_name,
             platform_name,
-            embed_description,
-            embed_color,
         )
 
         allowed_mentions = discord.AllowedMentions(
@@ -731,23 +457,21 @@ class AnnouncementService:
 
         except discord.Forbidden:
             LOGGER.error(
-                "Missing permissions to publish %s "
-                "announcement in guild %s, channel %s.",
-                platform_name,
+                "Missing permissions to publish announcement "
+                "in guild %s, channel %s.",
                 guild.id,
                 channel.id,
             )
-            return
+            return False
 
         except discord.HTTPException:
             LOGGER.exception(
-                "Discord rejected %s announcement "
+                "Discord rejected announcement "
                 "in guild %s, channel %s.",
-                platform_name,
                 guild.id,
                 channel.id,
             )
-            return
+            return False
 
         self.repository.record_event(
             guild_id=guild.id,
@@ -769,111 +493,112 @@ class AnnouncementService:
             message.id,
         )
 
+        return True
+
+    @staticmethod
+    def _announcement_text(
+        event: AnnouncementEvent,
+        author_name: str,
+        platform_name: str,
+    ) -> str:
+        """Build the generic announcement message."""
+        event_type = event.event_type.lower()
+
+        if event.platform == "minecraft":
+            if event_type == "server_online":
+                return "El servidor de Minecraft está en línea!"
+
+            if event_type == "event":
+                return "Hay un nuevo evento en Minecraft!"
+
+            if event_type == "update":
+                return "Hay una nueva actualización del servidor!"
+
+            return f"{author_name} publicó una novedad de Minecraft!"
+
+        if event.platform == "blacktibii":
+            if event_type == "release":
+                return "Black Tibii tiene un nuevo lanzamiento!"
+
+            if event_type == "news":
+                return "Black Tibii publicó una nueva noticia!"
+
+            return "BlackTibii.com tiene una nueva actualización!"
+
+        return f"{author_name} publicó una nueva actualización!"
+
     @staticmethod
     def _build_embed(
         event: AnnouncementEvent,
         author_name: str,
         platform_name: str,
-        embed_description: str,
-        embed_color: discord.Color,
     ) -> discord.Embed:
-        """Build the announcement embed."""
-        embed = discord.Embed(
-            title=event.title[:256],
-            url=event.url,
-            description=embed_description,
-            color=embed_color,
-        )
-
-        # FOTO DE PERFIL CIRCULAR A LA IZQUIERDA.
-        embed.set_author(
-            name=author_name[:256],
-            icon_url=event.author_icon_url,
-        )
-
+        """Build the standard announcement embed."""
         description = (
             event.description.strip()
             if event.description
-            else "No description"
+            else "No hay descripción disponible."
         )
 
-        embed.add_field(
-            name="Descripción",
-            value=description[:4096],
-            inline=False,
+        embed = discord.Embed(
+            title=event.title[:256],
+            url=event.url,
+            description=description[:4096],
+            color=discord.Color.blurple(),
         )
 
-        # IMAGEN CUADRADA ARRIBA A LA DERECHA.
-        if event.image_url:
-            embed.set_thumbnail(
-                url=event.image_url
+        if event.author_name:
+            embed.set_author(
+                name=author_name[:256],
+                icon_url=event.author_icon_url,
             )
 
-        # MINIATURA GRANDE ABAJO.
+        if event.image_url:
+            embed.set_thumbnail(
+                url=event.image_url,
+            )
+
         if event.thumbnail_url:
             embed.set_image(
-                url=event.thumbnail_url
+                url=event.thumbnail_url,
             )
 
         footer_text = platform_name
 
         if event.published_at:
             try:
-                # Spotify proporciona la fecha de lanzamiento,
-                # pero no una hora exacta de publicación.
-                if platform_name == "Spotify":
-                    release_date = event.published_at[:10]
-
-                    published_at = datetime.fromisoformat(
-                        release_date
+                published_at = datetime.fromisoformat(
+                    event.published_at.replace(
+                        "Z",
+                        "+00:00",
                     )
+                )
 
-                    footer_text = (
-                        f"{platform_name} • "
-                        f"{published_at.strftime('%d/%m/%Y')}"
-                    )
-
-                else:
-                    published_at = datetime.fromisoformat(
-                        event.published_at.replace(
-                            "Z",
-                            "+00:00",
-                        )
-                    )
-
+                if published_at.tzinfo is not None:
                     published_at = published_at.astimezone(
-                        MEXICO_TIMEZONE
+                        MEXICO_TIMEZONE,
                     )
 
-                    hour = published_at.strftime(
-                        "%I:%M %p"
-                    )
+                hour = published_at.strftime("%I:%M %p")
 
-                    hour = (
-                        hour.replace(
-                            "AM",
-                            "a. m.",
-                        )
-                        .replace(
-                            "PM",
-                            "p. m.",
-                        )
-                    )
+                hour = (
+                    hour.replace("AM", "a. m.")
+                    .replace("PM", "p. m.")
+                )
 
-                    footer_text = (
-                        f"{platform_name} • "
-                        f"{published_at.strftime('%d/%m/%Y')} "
-                        f"{hour}"
-                    )
+                footer_text = (
+                    f"{platform_name} • "
+                    f"{published_at.strftime('%d/%m/%Y')} "
+                    f"{hour}"
+                )
 
             except ValueError:
                 LOGGER.warning(
-                    "Invalid %s publication date: %s",
+                    "Invalid publication date for %s: %s",
                     platform_name,
                     event.published_at,
                 )
 
-        # LOGO PEQUEÑO DE LA PLATAFORMA + FECHA/HORA.
         embed.set_footer(
             text=footer_text,
             icon_url=event.platform_icon_url,

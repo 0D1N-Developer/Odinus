@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="docs/assets/odinus-banner.jpg" alt="Banner de Odinus" width="100%">
 </p>
 
@@ -14,7 +14,7 @@
 
 Odinus es una herramienta modular para administrar, automatizar y facilitar tareas
 dentro de comunidades de Discord. Su arquitectura permite incorporar progresivamente
-nuevos sistemas e integraciones desde un mismo bot.
+nuevos sistemas propios desde un mismo bot.
 
 ## Funciones actuales
 
@@ -29,15 +29,11 @@ Odinus cuenta actualmente con sistemas para:
 * Seguimiento automático de invitaciones.
 * Autoroles de países.
 * Autoroles de edad.
-* Centro de anuncios para plataformas externas.
 * Consulta de redes sociales de Black Tibii.
 
 ## Comandos
 
 ### 👤 Comandos para usuarios
-
-Estos comandos están disponibles para los miembros del servidor según las
-restricciones propias de cada sistema.
 
 * `/ping` — Comprueba que Odinus está activo.
 * `/ayuda` — Muestra los comandos disponibles.
@@ -47,19 +43,16 @@ restricciones propias de cada sistema.
 * `/cumpleaños registrar` — Registra una fecha de cumpleaños.
 * `/cumpleaños lista` — Consulta los cumpleaños registrados del servidor.
 
-Los sistemas de autoroles de **país** y **edad** son utilizados por los miembros
+Los sistemas de autoroles de país y edad son utilizados por los miembros
 mediante los botones publicados por los administradores.
 
 ### 🛠️ Comandos para administradores
-
-Estos comandos requieren permisos administrativos o los permisos específicos
-indicados por cada sistema.
 
 #### Administración
 
 * `/publicar` — Publica un mensaje en un canal seleccionado.
 * `/clear` — Elimina mensajes recientes del canal.
-* `/slowmode` — Configura el modo lento de un canal.
+* `/slowmode` — Configura el modo lento del canal.
 
 #### Cumpleaños
 
@@ -74,9 +67,6 @@ indicados por cada sistema.
 * `/paises` — Configura y publica el selector de autoroles de países.
 * `/edad` — Configura y publica el selector de autoroles de edad.
 
-Los miembros seleccionan sus roles directamente mediante los botones publicados
-por estos sistemas.
-
 #### Niveles
 
 * `/niveles activar` — Activa la obtención automática de experiencia.
@@ -86,20 +76,25 @@ por estos sistemas.
 #### Recompensas
 
 * `/recompensa añadir` — Añade una recompensa de nivel.
-* `/recompensa editar` — Edita una recompensa de nivel.
+* `/recompensa editar` — Edita una recompensa configurada.
 * `/recompensa eliminar` — Elimina una recompensa configurada.
 * `/recompensa lista` — Muestra las recompensas configuradas.
 
 Las recompensas utilizan roles de Discord y se sincronizan automáticamente
 con los cambios de nivel.
 
-#### Centro de anuncios
+## Centro de anuncios
 
-* `/anuncios configurar` — Configura una plataforma y su canal de anuncios.
-* `/anuncios activar` — Activa una plataforma de anuncios.
-* `/anuncios desactivar` — Desactiva una plataforma de anuncios.
-* `/anuncios comprobar` — Realiza una comprobación manual de una integración.
-* `/anuncios estado` — Muestra el estado de las plataformas configuradas.
+El Centro de anuncios está reservado para integraciones propias de Odin Software.
+
+Las próximas integraciones serán:
+
+* **Minecraft** — Comunicación y eventos relacionados con el servidor de Minecraft.
+* **BlackTibii.com** — Comunicación entre el sitio web de Black Tibii y Odinus.
+
+Estas integraciones serán desarrolladas directamente por 0D1N SOFTWARE,
+evitando depender de APIs externas de redes sociales para el funcionamiento
+principal del bot.
 
 ## Sistemas automáticos
 
@@ -122,34 +117,13 @@ persistentes de invitaciones por usuario.
 Cuando el sistema está activado, los mensajes de los miembros pueden generar
 experiencia automáticamente.
 
-Al alcanzar nuevos niveles, Odinus puede anunciar el ascenso y sincronizar las
-recompensas configuradas para ese nivel.
+Al alcanzar nuevos niveles, Odinus puede anunciar el ascenso y sincronizar
+las recompensas configuradas para ese nivel.
 
 ### 🏆 Recompensas
 
 Las recompensas de nivel están asociadas a roles de Discord. Cuando un miembro
 cambia de nivel, Odinus sincroniza automáticamente los roles correspondientes.
-
-## Centro de anuncios
-
-El Centro de anuncios permite detectar nuevas publicaciones y generar anuncios
-automáticos en Discord.
-
-### Plataformas activas
-
-* YouTube
-* Twitch
-* Instagram
-* Facebook
-* Spotify
-
-Cada integración puede utilizar su propia configuración de canal y mantiene
-protección contra anuncios duplicados.
-
-### Integraciones pendientes
-
-* `ServerMinecraft` — nombre temporal reservado para la futura integración con el servidor de Minecraft.
-* BlackTibii.com — integración futura con el sitio web de Black Tibii.
 
 ## Vista previa
 
@@ -163,7 +137,7 @@ Odinus forma parte de la visión de **0D1N SOFTWARE** de desarrollar herramienta
 propias, modulares y conectadas entre sí.
 
 La arquitectura del proyecto está diseñada para incorporar progresivamente
-nuevas automatizaciones, servicios e integraciones.
+sistemas propios e integraciones controladas directamente por el ecosistema Odin.
 
 ## Desarrollo
 
