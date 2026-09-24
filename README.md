@@ -22,6 +22,7 @@ Odinus cuenta actualmente con sistemas para:
 
 * Administración de canales y mensajes.
 * Publicación de mensajes mediante canales seleccionados.
+* Información y gestión del servidor.
 * Perfiles visuales de miembros.
 * Sistema de niveles y experiencia.
 * Recompensas por nivel mediante roles.
@@ -38,6 +39,7 @@ Odinus cuenta actualmente con sistemas para:
 * `/ping` — Comprueba que Odinus está activo.
 * `/ayuda` — Muestra los comandos disponibles.
 * `/redes` — Muestra las redes sociales de Black Tibii.
+* `/server info` — Muestra la información del servidor.
 * `/perfil [usuario]` — Muestra el perfil visual de un miembro.
 * `/nivel [usuario]` — Consulta el nivel, experiencia y progreso de un miembro.
 * `/cumpleaños registrar` — Registra una fecha de cumpleaños.
@@ -53,6 +55,12 @@ mediante los botones publicados por los administradores.
 * `/publicar` — Publica un mensaje en un canal seleccionado.
 * `/clear` — Elimina mensajes recientes del canal.
 * `/slowmode` — Configura el modo lento del canal.
+
+#### Servidor
+
+* `/server configurar` — Configura el sistema de información del servidor.
+* `/server activar` — Activa el sistema de información del servidor.
+* `/server desactivar` — Desactiva el sistema de información del servidor.
 
 #### Cumpleaños
 
