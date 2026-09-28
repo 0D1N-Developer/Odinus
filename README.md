@@ -31,6 +31,12 @@ Odinus cuenta actualmente con sistemas para:
 * Autoroles de países.
 * Autoroles de edad.
 * Consulta de redes sociales de Black Tibii.
+* Sistema completo de moderación manual.
+* Sistema propio de AutoMod.
+* Registros privados de moderación.
+* Excepciones de moderación por canales y roles.
+* Palabras bloqueadas configurables.
+* Protección contra diferentes tipos de spam y comportamiento repetitivo.
 
 ## Comandos
 
@@ -55,6 +61,27 @@ mediante los botones publicados por los administradores.
 * `/publicar` — Publica un mensaje en un canal seleccionado.
 * `/clear` — Elimina mensajes recientes del canal.
 * `/slowmode` — Configura el modo lento del canal.
+
+#### Moderación
+
+* `/moderacion configurar` — Configura el canal privado de registros y activa el sistema de moderación.
+* `/moderacion canal` — Cambia el canal utilizado para los registros de moderación.
+* `/moderacion estado` — Muestra el estado actual del sistema de moderación.
+* `/moderacion ignorar_canal` — Añade un canal a las excepciones de moderación.
+* `/moderacion quitar_canal` — Elimina un canal de las excepciones de moderación.
+* `/moderacion ignorar_rol` — Añade un rol a las excepciones de moderación.
+* `/moderacion quitar_rol` — Elimina un rol de las excepciones de moderación.
+* `/moderacion warn` — Registra una advertencia para un miembro.
+* `/moderacion warnings` — Consulta las advertencias registradas de un miembro.
+* `/moderacion modlogs` — Consulta el historial de acciones de moderación.
+* `/moderacion timeout` — Aplica un timeout temporal a un miembro.
+* `/moderacion mute` — Aplica una sanción de silencio.
+* `/moderacion unmute` — Retira una sanción de silencio.
+* `/moderacion kick` — Expulsa a un miembro del servidor.
+* `/moderacion ban` — Banea a un miembro del servidor.
+* `/moderacion unban` — Retira el baneo de un usuario.
+* `/moderacion automod` — Configura las reglas automáticas de moderación.
+* `/moderacion panel` — Abre el panel interactivo de administración de moderación.
 
 #### Servidor
 
@@ -90,6 +117,239 @@ mediante los botones publicados por los administradores.
 
 Las recompensas utilizan roles de Discord y se sincronizan automáticamente
 con los cambios de nivel.
+
+## Sistema de moderación
+
+Odinus incorpora un sistema completo de moderación diseñado para centralizar
+las herramientas administrativas y automatizar la detección de comportamientos
+problemáticos dentro del servidor.
+
+El sistema incluye:
+
+* Moderación manual.
+* Advertencias.
+* Historial de acciones de moderación.
+* Timeout.
+* Mute y unmute.
+* Kick.
+* Ban y unban.
+* Registros privados de moderación.
+* Canales ignorados.
+* Roles ignorados.
+* Palabras bloqueadas.
+* AutoMod configurable.
+* Acciones automáticas configurables.
+* Umbrales configurables.
+* Ventanas de tiempo configurables.
+* Duraciones de timeout configurables.
+* Cooldown para acciones automáticas.
+
+### Configuración
+
+`/moderacion configurar`
+
+Permite configurar el canal privado donde Odinus registrará las acciones
+de moderación y activar el sistema.
+
+`/moderacion canal`
+
+Permite cambiar posteriormente el canal utilizado para los registros.
+
+`/moderacion estado`
+
+Muestra el estado actual del sistema de moderación.
+
+### Excepciones
+
+Odinus permite excluir canales y roles específicos del sistema de moderación.
+
+`/moderacion ignorar_canal`
+
+Añade un canal a la lista de canales ignorados.
+
+`/moderacion quitar_canal`
+
+Elimina un canal de la lista de canales ignorados.
+
+`/moderacion ignorar_rol`
+
+Añade un rol a la lista de roles ignorados.
+
+`/moderacion quitar_rol`
+
+Elimina un rol de la lista de roles ignorados.
+
+Estas excepciones permiten mantener fuera de las reglas automáticas determinados
+canales o roles cuando sea necesario.
+
+### Moderación manual
+
+`/moderacion warn`
+
+Registra una advertencia para un miembro.
+
+`/moderacion warnings`
+
+Consulta las advertencias registradas de un miembro.
+
+`/moderacion modlogs`
+
+Consulta el historial de acciones de moderación realizadas por Odinus.
+
+`/moderacion timeout`
+
+Aplica un timeout temporal a un miembro.
+
+`/moderacion mute`
+
+Aplica una sanción de silencio.
+
+`/moderacion unmute`
+
+Retira una sanción de silencio.
+
+`/moderacion kick`
+
+Expulsa a un miembro del servidor.
+
+`/moderacion ban`
+
+Banea a un miembro del servidor.
+
+`/moderacion unban`
+
+Retira el baneo de un usuario.
+
+Las acciones de moderación respetan los permisos y la jerarquía de roles
+correspondiente de Discord.
+
+### Registros
+
+Las acciones de moderación pueden registrarse automáticamente en un canal
+privado configurado por el administrador.
+
+Los registros permiten conservar información relacionada con:
+
+* Usuario afectado.
+* Moderador.
+* Acción realizada.
+* Motivo.
+* Duración cuando corresponde.
+* Fecha y hora.
+* Acciones generadas automáticamente por AutoMod.
+
+## AutoMod
+
+Odinus incorpora un sistema propio de AutoMod configurable por servidor.
+
+Cada regla puede configurarse individualmente mediante:
+
+* Activación o desactivación.
+* Acción.
+* Umbral.
+* Ventana de tiempo.
+* Duración del timeout.
+
+Las acciones automáticas disponibles son:
+
+* Eliminar mensaje.
+* Advertir.
+* Aplicar timeout.
+
+### Reglas de AutoMod
+
+#### Anti-flood
+
+Detecta mensajes idénticos enviados repetidamente por un mismo usuario.
+
+Configuración predeterminada:
+
+* 5 mensajes repetidos.
+* Ventana deslizante de 60 segundos.
+
+La ventana es deslizante y no depende de los límites exactos de un minuto.
+
+#### Caracteres repetidos
+
+Detecta 15 o más caracteres idénticos consecutivos dentro de un mismo mensaje.
+
+#### Signos de interrogación repetidos
+
+Detecta 15 o más signos `?` consecutivos.
+
+#### Signos de exclamación repetidos
+
+Detecta 15 o más signos `!` consecutivos.
+
+#### Invitaciones de Discord
+
+Detecta invitaciones de Discord dentro de los mensajes cuando la regla está
+activada.
+
+#### Enlaces sospechosos
+
+Detecta enlaces considerados sospechosos por el sistema de moderación.
+
+#### Spam de menciones
+
+Controla las menciones repetidas realizadas por un mismo usuario.
+
+La configuración predeterminada activa la regla al alcanzar 4 menciones del
+mismo usuario o rol dentro de una ventana deslizante de 60 segundos.
+
+#### Spam de @everyone y @here
+
+Controla el uso repetido de menciones globales.
+
+La configuración predeterminada activa la regla al alcanzar 4 usos dentro de
+una ventana deslizante de 60 segundos.
+
+#### Spam de emojis
+
+Detecta 10 o más emojis repetidos dentro de un mismo mensaje.
+
+#### Palabras bloqueadas
+
+Permite configurar una lista propia de palabras que serán detectadas
+automáticamente por Odinus.
+
+### Mensajes largos y multilínea
+
+Los mensajes largos o con varias líneas **no son considerados infracciones
+por su longitud o formato**.
+
+Odinus no elimina un mensaje simplemente porque sea extenso, contenga muchas
+líneas o esté estructurado en varios párrafos.
+
+Esto permite utilizar mensajes largos para documentación, explicaciones,
+anuncios y conversaciones normales.
+
+### Panel de moderación
+
+`/moderacion panel`
+
+Abre el panel interactivo de administración del sistema de moderación.
+
+Desde el panel se pueden administrar:
+
+* Activación y desactivación del sistema.
+* Canal de registros.
+* Canales ignorados.
+* Roles ignorados.
+* Palabras bloqueadas.
+* Reglas de AutoMod.
+* Activación de cada regla.
+* Acción de cada regla.
+* Umbral.
+* Ventana temporal.
+* Duración de timeout.
+* Restauración de valores predeterminados.
+* Estado general de moderación.
+
+El panel utiliza botones, selectores y modales interactivos de Discord.
+
+Todas las operaciones administrativas del panel requieren permisos de
+administrador.
 
 ## Centro de anuncios
 
@@ -132,6 +392,29 @@ las recompensas configuradas para ese nivel.
 
 Las recompensas de nivel están asociadas a roles de Discord. Cuando un miembro
 cambia de nivel, Odinus sincroniza automáticamente los roles correspondientes.
+
+### 🛡️ Moderación y AutoMod
+
+Odinus puede analizar automáticamente los mensajes de los miembros cuando el
+sistema de moderación se encuentra activo.
+
+El AutoMod puede detectar:
+
+* Flood.
+* Mensajes repetidos.
+* Caracteres repetidos.
+* Signos de interrogación repetidos.
+* Signos de exclamación repetidos.
+* Invitaciones de Discord.
+* Enlaces sospechosos.
+* Spam de menciones.
+* Spam de `@everyone` y `@here`.
+* Spam de emojis.
+* Palabras bloqueadas.
+
+Las reglas utilizan ventanas temporales deslizantes cuando corresponde y
+cuentan con cooldown para evitar la ejecución repetitiva de acciones
+automáticas sobre el mismo usuario y regla.
 
 ## Vista previa
 

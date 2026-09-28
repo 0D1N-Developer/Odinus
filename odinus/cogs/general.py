@@ -153,24 +153,60 @@ class GeneralCog(commands.Cog):
 
         admin_commands = (
             "\n\n"
-            "**🛠️ Comandos para administradores**\n"
+            "**🛠️ Comandos para administradores**\n\n"
+
+            "**Administración general**\n"
             "`/publicar` — Publica un mensaje en un canal seleccionado.\n"
             "`/clear` — Elimina mensajes recientes del canal.\n"
-            "`/slowmode` — Configura el modo lento del canal.\n"
+            "`/slowmode` — Configura el modo lento del canal.\n\n"
+
+            "**Moderación**\n"
+            "`/moderacion configurar` — Configura el canal privado de registros y activa la moderación.\n"
+            "`/moderacion canal` — Cambia el canal donde se registran las acciones de moderación.\n"
+            "`/moderacion estado` — Muestra el estado actual del sistema de moderación.\n"
+            "`/moderacion ignorar_canal` — Añade un canal a las excepciones de moderación.\n"
+            "`/moderacion quitar_canal` — Elimina un canal de las excepciones de moderación.\n"
+            "`/moderacion ignorar_rol` — Añade un rol a las excepciones de moderación.\n"
+            "`/moderacion quitar_rol` — Elimina un rol de las excepciones de moderación.\n"
+            "`/moderacion warn` — Registra una advertencia para un miembro.\n"
+            "`/moderacion warnings` — Consulta las advertencias de un miembro.\n"
+            "`/moderacion modlogs` — Consulta el historial de acciones de moderación.\n"
+            "`/moderacion timeout` — Aplica un timeout temporal a un miembro.\n"
+            "`/moderacion mute` — Aplica una sanción de silencio configurada por Odinus.\n"
+            "`/moderacion unmute` — Retira la sanción de silencio.\n"
+            "`/moderacion kick` — Expulsa a un miembro del servidor.\n"
+            "`/moderacion ban` — Banea a un miembro del servidor.\n"
+            "`/moderacion unban` — Retira el baneo de un usuario.\n"
+            "`/moderacion automod` — Configura las reglas automáticas de moderación.\n"
+            "`/moderacion panel` — Abre el panel interactivo completo de moderación.\n\n"
+
+            "**Servidor**\n"
             "`/server configurar` — Configura el sistema de información del servidor.\n"
             "`/server activar` — Activa el sistema de información del servidor.\n"
-            "`/server desactivar` — Desactiva el sistema de información del servidor.\n"
-            "`/cumpleaños configurar_canal` — Configura el canal de avisos de cumpleaños.\n"
-            "`/invitaciones configurar_canal` — Configura el canal de seguimiento de invitaciones.\n"
+            "`/server desactivar` — Desactiva el sistema de información del servidor.\n\n"
+
+            "**Cumpleaños**\n"
+            "`/cumpleaños configurar_canal` — Configura el canal de avisos de cumpleaños.\n\n"
+
+            "**Invitaciones**\n"
+            "`/invitaciones configurar_canal` — Configura el canal de seguimiento de invitaciones.\n\n"
+
+            "**Autoroles**\n"
             "`/paises` — Configura el selector de autoroles de países.\n"
-            "`/edad` — Configura el selector de autoroles de edad.\n"
+            "`/edad` — Configura el selector de autoroles de edad.\n\n"
+
+            "**Niveles**\n"
             "`/niveles activar` — Activa la obtención automática de XP.\n"
             "`/niveles desactivar` — Desactiva la obtención automática de XP.\n"
-            "`/nivel_administrar` — Administra el nivel y XP de un miembro.\n"
+            "`/nivel_administrar` — Administra el nivel y XP de un miembro.\n\n"
+
+            "**Recompensas**\n"
             "`/recompensa añadir` — Añade una recompensa por nivel.\n"
             "`/recompensa editar` — Edita una recompensa por nivel.\n"
             "`/recompensa eliminar` — Elimina una recompensa por nivel.\n"
-            "`/recompensa lista` — Muestra las recompensas configuradas.\n"
+            "`/recompensa lista` — Muestra las recompensas configuradas.\n\n"
+
+            "**Centro de anuncios**\n"
             "`/anuncios configurar` — Configura una fuente y su canal de anuncios.\n"
             "`/anuncios activar` — Activa una fuente de anuncios.\n"
             "`/anuncios desactivar` — Desactiva una fuente de anuncios.\n"
@@ -178,18 +214,11 @@ class GeneralCog(commands.Cog):
             "`/anuncios estado` — Muestra el estado de las fuentes configuradas."
         )
 
-        announcement_info = (
-            "\n\n"
-            "**📢 Centro de anuncios**\n"
-            "Minecraft • BlackTibii.com"
-        )
-
         if is_admin:
             content = (
                 "**Odinus • Comandos disponibles**\n\n"
                 f"{user_commands}"
                 f"{admin_commands}"
-                f"{announcement_info}"
             )
         else:
             content = (
