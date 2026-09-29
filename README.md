@@ -107,6 +107,7 @@ mediante los botones publicados por los administradores.
 * `/niveles activar` — Activa la obtención automática de experiencia.
 * `/niveles desactivar` — Desactiva la obtención automática de experiencia.
 * `/nivel_administrar` — Abre el panel para administrar manualmente el nivel y la experiencia de un miembro.
+* `/niveles_configurar_canal` — Configura el canal donde se muestran los mensajes de niveles.
 
 #### Recompensas
 

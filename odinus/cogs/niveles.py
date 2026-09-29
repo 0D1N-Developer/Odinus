@@ -46,7 +46,7 @@ class LevelView(discord.ui.View):
 
     @discord.ui.button(
         label="Ver ranking",
-        emoji="🏆",
+        emoji="Ã°Å¸Ââ€ ",
         style=discord.ButtonStyle.primary,
     )
     async def ranking_button(
@@ -57,7 +57,7 @@ class LevelView(discord.ui.View):
         """Open the server leaderboard."""
         if interaction.user.id != self.owner_id:
             await interaction.response.send_message(
-                "❌ Solo la persona que ejecutó este comando "
+                "Ã¢ÂÅ’ Solo la persona que ejecutÃƒÂ³ este comando "
                 "puede utilizar estos botones.",
                 ephemeral=True,
             )
@@ -126,7 +126,7 @@ class RankingView(discord.ui.View):
             return True
 
         await interaction.response.send_message(
-            "❌ Solo la persona que ejecutó este comando "
+            "Ã¢ÂÅ’ Solo la persona que ejecutÃƒÂ³ este comando "
             "puede utilizar estos botones.",
             ephemeral=True,
         )
@@ -135,7 +135,7 @@ class RankingView(discord.ui.View):
 
     @discord.ui.button(
         label="Anterior",
-        emoji="◀️",
+        emoji="Ã¢â€”â‚¬Ã¯Â¸Â",
         style=discord.ButtonStyle.secondary,
     )
     async def previous_button(
@@ -159,7 +159,7 @@ class RankingView(discord.ui.View):
 
     @discord.ui.button(
         label="Mi nivel",
-        emoji="👤",
+        emoji="Ã°Å¸â€˜Â¤",
         style=discord.ButtonStyle.primary,
     )
     async def profile_button(
@@ -182,7 +182,7 @@ class RankingView(discord.ui.View):
 
     @discord.ui.button(
         label="Siguiente",
-        emoji="▶️",
+        emoji="Ã¢â€“Â¶Ã¯Â¸Â",
         style=discord.ButtonStyle.secondary,
     )
     async def next_button(
@@ -242,7 +242,7 @@ class AdminLevelView(discord.ui.View):
             return True
 
         await interaction.response.send_message(
-            "❌ Solo el administrador que abrió este panel "
+            "Ã¢ÂÅ’ Solo el administrador que abriÃƒÂ³ este panel "
             "puede utilizarlo.",
             ephemeral=True,
         )
@@ -251,7 +251,7 @@ class AdminLevelView(discord.ui.View):
 
     @discord.ui.button(
         label="Dar XP",
-        emoji="➕",
+        emoji="Ã¢Å¾â€¢",
         style=discord.ButtonStyle.success,
         row=0,
     )
@@ -267,7 +267,7 @@ class AdminLevelView(discord.ui.View):
 
     @discord.ui.button(
         label="Quitar XP",
-        emoji="➖",
+        emoji="Ã¢Å¾â€“",
         style=discord.ButtonStyle.danger,
         row=0,
     )
@@ -283,7 +283,7 @@ class AdminLevelView(discord.ui.View):
 
     @discord.ui.button(
         label="Subir nivel",
-        emoji="⬆️",
+        emoji="Ã¢Â¬â€ Ã¯Â¸Â",
         style=discord.ButtonStyle.primary,
         row=1,
     )
@@ -300,7 +300,7 @@ class AdminLevelView(discord.ui.View):
 
         if current.level >= MAX_LEVEL:
             await interaction.response.send_message(
-                "🏆 El usuario ya se encuentra en el nivel máximo.",
+                "Ã°Å¸Ââ€  El usuario ya se encuentra en el nivel mÃƒÂ¡ximo.",
                 ephemeral=True,
             )
             return
@@ -332,8 +332,8 @@ class AdminLevelView(discord.ui.View):
                 guild=interaction.guild,
                 target_id=self.target_id,
                 action_message=(
-                    f"✅ Nivel aumentado: "
-                    f"**{current.level} → {updated.level}**"
+                    f"Ã¢Å“â€¦ Nivel aumentado: "
+                    f"**{current.level} Ã¢â€ â€™ {updated.level}**"
                 ),
             ),
             view=self,
@@ -341,7 +341,7 @@ class AdminLevelView(discord.ui.View):
 
     @discord.ui.button(
         label="Bajar nivel",
-        emoji="⬇️",
+        emoji="Ã¢Â¬â€¡Ã¯Â¸Â",
         style=discord.ButtonStyle.secondary,
         row=1,
     )
@@ -358,7 +358,7 @@ class AdminLevelView(discord.ui.View):
 
         if current.level <= 0:
             await interaction.response.send_message(
-                "❌ El usuario ya se encuentra en el nivel 0.",
+                "Ã¢ÂÅ’ El usuario ya se encuentra en el nivel 0.",
                 ephemeral=True,
             )
             return
@@ -390,8 +390,8 @@ class AdminLevelView(discord.ui.View):
                 guild=interaction.guild,
                 target_id=self.target_id,
                 action_message=(
-                    f"✅ Nivel reducido: "
-                    f"**{current.level} → {updated.level}**"
+                    f"Ã¢Å“â€¦ Nivel reducido: "
+                    f"**{current.level} Ã¢â€ â€™ {updated.level}**"
                 ),
             ),
             view=self,
@@ -399,7 +399,7 @@ class AdminLevelView(discord.ui.View):
 
     @discord.ui.button(
         label="Resetear",
-        emoji="🔄",
+        emoji="Ã°Å¸â€â€ž",
         style=discord.ButtonStyle.danger,
         row=2,
     )
@@ -411,15 +411,15 @@ class AdminLevelView(discord.ui.View):
         """Open reset confirmation."""
         await interaction.response.send_message(
             embed=discord.Embed(
-                title="⚠️ Confirmar reset",
+                title="Ã¢Å¡Â Ã¯Â¸Â Confirmar reset",
                 description=(
-                    f"¿Seguro que quieres resetear completamente "
+                    f"Ã‚Â¿Seguro que quieres resetear completamente "
                     f"a <@{self.target_id}>?\n\n"
-                    "Esto establecerá:\n"
-                    "• Nivel: **0**\n"
-                    "• XP: **0**\n"
-                    "• Recompensas de nivel: **se retirarán**\n\n"
-                    "Esta acción no puede deshacerse automáticamente."
+                    "Esto establecerÃƒÂ¡:\n"
+                    "Ã¢â‚¬Â¢ Nivel: **0**\n"
+                    "Ã¢â‚¬Â¢ XP: **0**\n"
+                    "Ã¢â‚¬Â¢ Recompensas de nivel: **se retirarÃƒÂ¡n**\n\n"
+                    "Esta acciÃƒÂ³n no puede deshacerse automÃƒÂ¡ticamente."
                 ),
                 color=discord.Color.red(),
             ),
@@ -434,7 +434,7 @@ class AdminLevelView(discord.ui.View):
         )
 
 
-class AddXPModal(discord.ui.Modal, title="➕ Dar experiencia"):
+class AddXPModal(discord.ui.Modal, title="Ã¢Å¾â€¢ Dar experiencia"):
     """Modal for adding XP."""
 
     amount = discord.ui.TextInput(
@@ -464,14 +464,14 @@ class AddXPModal(discord.ui.Modal, title="➕ Dar experiencia"):
             amount = int(self.amount.value)
         except ValueError:
             await interaction.response.send_message(
-                "❌ Debes introducir una cantidad numérica válida.",
+                "Ã¢ÂÅ’ Debes introducir una cantidad numÃƒÂ©rica vÃƒÂ¡lida.",
                 ephemeral=True,
             )
             return
 
         if amount <= 0:
             await interaction.response.send_message(
-                "❌ La cantidad debe ser mayor que 0.",
+                "Ã¢ÂÅ’ La cantidad debe ser mayor que 0.",
                 ephemeral=True,
             )
             return
@@ -514,7 +514,7 @@ class AddXPModal(discord.ui.Modal, title="➕ Dar experiencia"):
                 guild=guild,
                 target_id=self.target_id,
                 action_message=(
-                    f"✅ Se otorgaron **{amount:,} XP**."
+                    f"Ã¢Å“â€¦ Se otorgaron **{amount:,} XP**."
                 ),
             ),
             view=AdminLevelView(
@@ -527,7 +527,7 @@ class AddXPModal(discord.ui.Modal, title="➕ Dar experiencia"):
         )
 
 
-class RemoveXPModal(discord.ui.Modal, title="➖ Quitar experiencia"):
+class RemoveXPModal(discord.ui.Modal, title="Ã¢Å¾â€“ Quitar experiencia"):
     """Modal for removing XP."""
 
     amount = discord.ui.TextInput(
@@ -557,14 +557,14 @@ class RemoveXPModal(discord.ui.Modal, title="➖ Quitar experiencia"):
             amount = int(self.amount.value)
         except ValueError:
             await interaction.response.send_message(
-                "❌ Debes introducir una cantidad numérica válida.",
+                "Ã¢ÂÅ’ Debes introducir una cantidad numÃƒÂ©rica vÃƒÂ¡lida.",
                 ephemeral=True,
             )
             return
 
         if amount <= 0:
             await interaction.response.send_message(
-                "❌ La cantidad debe ser mayor que 0.",
+                "Ã¢ÂÅ’ La cantidad debe ser mayor que 0.",
                 ephemeral=True,
             )
             return
@@ -607,7 +607,7 @@ class RemoveXPModal(discord.ui.Modal, title="➖ Quitar experiencia"):
                 guild=guild,
                 target_id=self.target_id,
                 action_message=(
-                    f"✅ Se quitaron **{amount:,} XP**."
+                    f"Ã¢Å“â€¦ Se quitaron **{amount:,} XP**."
                 ),
             ),
             view=AdminLevelView(
@@ -648,7 +648,7 @@ class ResetConfirmationView(discord.ui.View):
             return True
 
         await interaction.response.send_message(
-            "❌ No puedes utilizar esta confirmación.",
+            "Ã¢ÂÅ’ No puedes utilizar esta confirmaciÃƒÂ³n.",
             ephemeral=True,
         )
 
@@ -656,7 +656,7 @@ class ResetConfirmationView(discord.ui.View):
 
     @discord.ui.button(
         label="Confirmar reset",
-        emoji="🔴",
+        emoji="Ã°Å¸â€Â´",
         style=discord.ButtonStyle.danger,
     )
     async def confirm_button(
@@ -695,7 +695,7 @@ class ResetConfirmationView(discord.ui.View):
                 guild=interaction.guild,
                 target_id=self.target_id,
                 action_message=(
-                    "🔄 El nivel, la experiencia y las "
+                    "Ã°Å¸â€â€ž El nivel, la experiencia y las "
                     "recompensas fueron completamente reseteados."
                 ),
             ),
@@ -706,7 +706,7 @@ class ResetConfirmationView(discord.ui.View):
 
     @discord.ui.button(
         label="Cancelar",
-        emoji="❌",
+        emoji="Ã¢ÂÅ’",
         style=discord.ButtonStyle.secondary,
     )
     async def cancel_button(
@@ -716,7 +716,7 @@ class ResetConfirmationView(discord.ui.View):
     ) -> None:
         """Cancel the reset."""
         await interaction.response.edit_message(
-            content="❌ Reset cancelado.",
+            content="Ã¢ÂÅ’ Reset cancelado.",
             embed=None,
             view=None,
         )
@@ -724,12 +724,131 @@ class ResetConfirmationView(discord.ui.View):
         self.stop()
 
 
+class LevelChannelConfigView(discord.ui.View):
+    """Interactive configuration for the level-up announcement channel."""
+
+    def __init__(
+        self,
+        cog: "Niveles",
+        admin_id: int,
+        guild_id: int,
+    ) -> None:
+        super().__init__(timeout=300)
+
+        self.cog = cog
+        self.admin_id = admin_id
+        self.guild_id = guild_id
+
+        self.channel_select = discord.ui.ChannelSelect(
+            placeholder="Selecciona el canal de mensajes de niveles...",
+            channel_types=[
+                discord.ChannelType.text,
+                discord.ChannelType.news,
+            ],
+            min_values=1,
+            max_values=1,
+        )
+
+        self.channel_select.callback = self.channel_selected
+        self.add_item(self.channel_select)
+
+    async def interaction_check(
+        self,
+        interaction: discord.Interaction,
+    ) -> bool:
+        """Only the administrator who opened the panel can use it."""
+        if interaction.user.id == self.admin_id:
+            return True
+
+        await interaction.response.send_message(
+            "❌ Solo el administrador que abrió esta configuración puede utilizarla.",
+            ephemeral=True,
+        )
+        return False
+
+    @discord.ui.button(
+        label="Quitar canal",
+        style=discord.ButtonStyle.danger,
+        emoji="🗑️",
+        row=1,
+    )
+    async def clear_channel_button(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button,
+    ) -> None:
+        """Remove the configured channel."""
+        self.cog.level_service.repository.set_level_channel(
+            self.guild_id,
+            None,
+        )
+
+        await interaction.response.edit_message(
+            content=(
+                "✅ Canal de niveles eliminado.\n\n"
+                "Los mensajes de subida de nivel volverán a "
+                "mostrarse en el canal donde ocurrió la subida."
+            ),
+            embed=None,
+            view=None,
+        )
+
+        self.stop()
+
+    async def channel_selected(
+        self,
+        interaction: discord.Interaction,
+    ) -> None:
+        """Save the selected level-up channel."""
+        if not self.channel_select.values:
+            await interaction.response.send_message(
+                "❌ No se seleccionó ningún canal.",
+                ephemeral=True,
+            )
+            return
+
+        selected = self.channel_select.values[0]
+        channel_id = getattr(selected, "id", None)
+
+        if channel_id is None:
+            await interaction.response.send_message(
+                "❌ No se pudo identificar el canal seleccionado.",
+                ephemeral=True,
+            )
+            return
+
+        channel = interaction.guild.get_channel(channel_id)
+
+        if channel is None:
+            await interaction.response.send_message(
+                "❌ No se encontró el canal seleccionado.",
+                ephemeral=True,
+            )
+            return
+
+        self.cog.level_service.repository.set_level_channel(
+            self.guild_id,
+            channel.id,
+        )
+
+        await interaction.response.edit_message(
+            content=(
+                "✅ Canal de niveles configurado correctamente.\n\n"
+                "Los mensajes de subida de nivel se enviarán en "
+                f"{channel.mention}."
+            ),
+            embed=None,
+            view=None,
+        )
+
+        self.stop()
+
 class Niveles(commands.Cog):
     """Handle XP, levels, leaderboards and administration."""
 
     niveles_group = app_commands.Group(
         name="niveles",
-        description="Activa o desactiva el sistema automático de niveles.",
+        description="Activa o desactiva el sistema automÃƒÂ¡tico de niveles.",
     )
 
     def __init__(
@@ -752,13 +871,11 @@ class Niveles(commands.Cog):
         if message.guild is None:
             return
 
-        # Do not award automatic XP while leveling is disabled.
         if not self.level_service.is_enabled(
             message.guild.id
         ):
             return
 
-        # Capture the real level before processing the message.
         current = self.level_service.repository.get_user(
             guild_id=message.guild.id,
             user_id=message.author.id,
@@ -805,7 +922,7 @@ class Niveles(commands.Cog):
 
     @niveles_group.command(
         name="activar",
-        description="Activa la ganancia automática de XP por mensajes.",
+        description="Activa la ganancia automÃƒÂ¡tica de XP por mensajes.",
     )
     @app_commands.checks.has_permissions(
         administrator=True
@@ -817,7 +934,7 @@ class Niveles(commands.Cog):
         """Enable automatic leveling."""
         if interaction.guild is None:
             await interaction.response.send_message(
-                "❌ Este comando solamente puede utilizarse "
+                "Ã¢ÂÅ’ Este comando solamente puede utilizarse "
                 "dentro de un servidor.",
                 ephemeral=True,
             )
@@ -827,7 +944,7 @@ class Niveles(commands.Cog):
 
         if self.level_service.is_enabled(guild_id):
             await interaction.response.send_message(
-                "ℹ️ El sistema de niveles ya está **activo**.",
+                "Ã¢â€žÂ¹Ã¯Â¸Â El sistema de niveles ya estÃƒÂ¡ **activo**.",
                 ephemeral=True,
             )
             return
@@ -844,14 +961,14 @@ class Niveles(commands.Cog):
         )
 
         await interaction.response.send_message(
-            "✅ El sistema de niveles ha sido **activado**.\n\n"
-            "Los mensajes volverán a otorgar XP automáticamente.",
+            "Ã¢Å“â€¦ El sistema de niveles ha sido **activado**.\n\n"
+            "Los mensajes volverÃƒÂ¡n a otorgar XP automÃƒÂ¡ticamente.",
             ephemeral=True,
         )
 
     @niveles_group.command(
         name="desactivar",
-        description="Desactiva la ganancia automática de XP por mensajes.",
+        description="Desactiva la ganancia automÃƒÂ¡tica de XP por mensajes.",
     )
     @app_commands.checks.has_permissions(
         administrator=True
@@ -863,7 +980,7 @@ class Niveles(commands.Cog):
         """Disable automatic leveling."""
         if interaction.guild is None:
             await interaction.response.send_message(
-                "❌ Este comando solamente puede utilizarse "
+                "Ã¢ÂÅ’ Este comando solamente puede utilizarse "
                 "dentro de un servidor.",
                 ephemeral=True,
             )
@@ -873,7 +990,7 @@ class Niveles(commands.Cog):
 
         if not self.level_service.is_enabled(guild_id):
             await interaction.response.send_message(
-                "ℹ️ El sistema de niveles ya está **desactivado**.",
+                "Ã¢â€žÂ¹Ã¯Â¸Â El sistema de niveles ya estÃƒÂ¡ **desactivado**.",
                 ephemeral=True,
             )
             return
@@ -890,15 +1007,89 @@ class Niveles(commands.Cog):
         )
 
         await interaction.response.send_message(
-            "⏸️ El sistema de niveles ha sido **desactivado**.\n\n"
-            "Los mensajes ya no otorgarán XP automáticamente.\n"
+            "Ã¢ÂÂ¸Ã¯Â¸Â El sistema de niveles ha sido **desactivado**.\n\n"
+            "Los mensajes ya no otorgarÃƒÂ¡n XP automÃƒÂ¡ticamente.\n"
             "Los datos existentes, niveles y recompensas "
-            "se conservarán.",
+            "se conservarÃƒÂ¡n.",
+            ephemeral=True,
+        )
+
+    @app_commands.command(
+        name="niveles_configurar_canal",
+        description=(
+            "Configura el canal donde se muestran los mensajes de niveles."
+        ),
+    )
+    @app_commands.checks.has_permissions(
+        administrator=True
+    )
+    async def niveles_configurar_canal(
+        self,
+        interaction: discord.Interaction,
+    ) -> None:
+        """Configure the channel used for level-up announcements."""
+        if interaction.guild is None:
+            await interaction.response.send_message(
+                "Ã¢ÂÅ’ Este comando solamente puede utilizarse "
+                "dentro de un servidor.",
+                ephemeral=True,
+            )
+            return
+
+        guild_id = interaction.guild.id
+
+        current_channel_id = (
+            self.level_service.repository.get_level_channel(
+                guild_id
+            )
+        )
+
+        current_channel = None
+
+        if current_channel_id is not None:
+            current_channel = interaction.guild.get_channel(
+                current_channel_id
+            )
+
+        if current_channel is not None:
+            current_text = (
+                f"Actualmente: {current_channel.mention}\n\n"
+                "Selecciona un nuevo canal para cambiarlo."
+            )
+        else:
+            current_text = (
+                "Actualmente: **sin canal configurado**.\n\n"
+                "Selecciona un canal para configurarlo."
+            )
+
+        embed = discord.Embed(
+            title="Ã°Å¸â€œÂ¢ Canal de niveles",
+            description=current_text,
+            color=discord.Color.blurple(),
+        )
+
+        embed.add_field(
+            name="Ã‚Â¿DÃƒÂ³nde aparecerÃƒÂ¡n los mensajes?",
+            value=(
+                "Cuando un usuario suba de nivel, Odinus enviarÃƒÂ¡ "
+                "el anuncio en el canal seleccionado."
+            ),
+            inline=False,
+        )
+
+        await interaction.response.send_message(
+            embed=embed,
+            view=LevelChannelConfigView(
+                cog=self,
+                admin_id=interaction.user.id,
+                guild_id=guild_id,
+            ),
             ephemeral=True,
         )
 
     @niveles_activar.error
     @niveles_desactivar.error
+    @niveles_configurar_canal.error
     async def niveles_config_error(
         self,
         interaction: discord.Interaction,
@@ -910,7 +1101,7 @@ class Niveles(commands.Cog):
             app_commands.MissingPermissions,
         ):
             await interaction.response.send_message(
-                "❌ Necesitas tener el permiso de "
+                "Ã¢ÂÅ’ Necesitas tener el permiso de "
                 "**Administrador** para utilizar este comando.",
                 ephemeral=True,
             )
@@ -923,12 +1114,12 @@ class Niveles(commands.Cog):
 
         if interaction.response.is_done():
             await interaction.followup.send(
-                "❌ Ocurrió un error al modificar el sistema de niveles.",
+                "Ã¢ÂÅ’ OcurriÃƒÂ³ un error al modificar el sistema de niveles.",
                 ephemeral=True,
             )
         else:
             await interaction.response.send_message(
-                "❌ Ocurrió un error al modificar el sistema de niveles.",
+                "Ã¢ÂÅ’ OcurriÃƒÂ³ un error al modificar el sistema de niveles.",
                 ephemeral=True,
             )
 
@@ -947,7 +1138,7 @@ class Niveles(commands.Cog):
         """Display the current level information."""
         if interaction.guild is None:
             await interaction.response.send_message(
-                "❌ Este comando solamente puede utilizarse "
+                "Ã¢ÂÅ’ Este comando solamente puede utilizarse "
                 "dentro de un servidor.",
                 ephemeral=True,
             )
@@ -989,7 +1180,7 @@ class Niveles(commands.Cog):
         """Open the administrative level panel."""
         if interaction.guild is None:
             await interaction.response.send_message(
-                "❌ Este comando solamente puede utilizarse "
+                "Ã¢ÂÅ’ Este comando solamente puede utilizarse "
                 "dentro de un servidor.",
                 ephemeral=True,
             )
@@ -1025,7 +1216,7 @@ class Niveles(commands.Cog):
             app_commands.MissingPermissions,
         ):
             await interaction.response.send_message(
-                "❌ Necesitas tener el permiso de "
+                "Ã¢ÂÅ’ Necesitas tener el permiso de "
                 "**Administrador** para utilizar este comando.",
                 ephemeral=True,
             )
@@ -1038,12 +1229,12 @@ class Niveles(commands.Cog):
 
         if interaction.response.is_done():
             await interaction.followup.send(
-                "❌ Ocurrió un error al abrir el panel administrativo.",
+                "Ã¢ÂÅ’ OcurriÃƒÂ³ un error al abrir el panel administrativo.",
                 ephemeral=True,
             )
         else:
             await interaction.response.send_message(
-                "❌ Ocurrió un error al abrir el panel administrativo.",
+                "Ã¢ÂÅ’ OcurriÃƒÂ³ un error al abrir el panel administrativo.",
                 ephemeral=True,
             )
 
@@ -1090,7 +1281,7 @@ class Niveles(commands.Cog):
         if user_data.level >= MAX_LEVEL:
             progress_percentage = 100
             xp_remaining = 0
-            progress_bar = "████████████████████"
+            progress_bar = "Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†Ã¢â€“Ë†"
         else:
             if xp_required > 0:
                 progress_percentage = int(
@@ -1117,7 +1308,7 @@ class Niveles(commands.Cog):
             )
 
         embed = discord.Embed(
-            title="📊 Nivel de Odinus",
+            title="Ã°Å¸â€œÅ  Nivel de Odinus",
             description=f"**{display_name}**",
             color=discord.Color.blurple(),
         )
@@ -1126,23 +1317,21 @@ class Niveles(commands.Cog):
             embed.set_thumbnail(url=avatar_url)
 
         embed.add_field(
-            name="⭐ Nivel",
+            name="Ã¢Â­Â Nivel",
             value=f"**{user_data.level}**",
             inline=True,
         )
 
         embed.add_field(
-            name="✨ XP total",
-            value=(
-                f"**{user_data.total_xp:,} XP**"
-            ),
+            name="Ã¢Å“Â¨ XP total",
+            value=f"**{user_data.total_xp:,} XP**",
             inline=True,
         )
 
         if user_data.level >= MAX_LEVEL:
             progress_text = (
                 f"{progress_bar}\n"
-                "**Nivel máximo alcanzado**"
+                "**Nivel mÃƒÂ¡ximo alcanzado**"
             )
         else:
             progress_text = (
@@ -1153,36 +1342,34 @@ class Niveles(commands.Cog):
             )
 
         embed.add_field(
-            name="📈 Progreso",
+            name="Ã°Å¸â€œË† Progreso",
             value=progress_text,
             inline=False,
         )
 
         if user_data.level >= MAX_LEVEL:
-            next_level_text = "🏆 Nivel máximo"
+            next_level_text = "Ã°Å¸Ââ€  Nivel mÃƒÂ¡ximo"
             remaining_text = "0 XP"
         else:
             next_level_text = (
                 f"**Nivel {user_data.level + 1}**"
             )
-            remaining_text = (
-                f"**{xp_remaining:,} XP**"
-            )
+            remaining_text = f"**{xp_remaining:,} XP**"
 
         embed.add_field(
-            name="🎯 Siguiente nivel",
+            name="Ã°Å¸Å½Â¯ Siguiente nivel",
             value=next_level_text,
             inline=True,
         )
 
         embed.add_field(
-            name="⚡ XP restante",
+            name="Ã¢Å¡Â¡ XP restante",
             value=remaining_text,
             inline=True,
         )
 
         embed.set_footer(
-            text="Odinus Levels • v1.4",
+            text="Odinus Levels Ã¢â‚¬Â¢ v1.4",
         )
 
         return embed
@@ -1209,7 +1396,7 @@ class Niveles(commands.Cog):
         )
 
         embed = discord.Embed(
-            title="⚙️ Administración de niveles",
+            title="Ã¢Å¡â„¢Ã¯Â¸Â AdministraciÃƒÂ³n de niveles",
             description=(
                 f"Usuario seleccionado: "
                 f"**{display_name}**\n"
@@ -1222,16 +1409,14 @@ class Niveles(commands.Cog):
             embed.set_thumbnail(url=avatar_url)
 
         embed.add_field(
-            name="⭐ Nivel actual",
+            name="Ã¢Â­Â Nivel actual",
             value=f"**{user_data.level}**",
             inline=True,
         )
 
         embed.add_field(
-            name="✨ XP total",
-            value=(
-                f"**{user_data.total_xp:,} XP**"
-            ),
+            name="Ã¢Å“Â¨ XP total",
+            value=f"**{user_data.total_xp:,} XP**",
             inline=True,
         )
 
@@ -1243,9 +1428,7 @@ class Niveles(commands.Cog):
             )
 
         embed.set_footer(
-            text=(
-                "Odinus Levels • Administración v1.4"
-            ),
+            text="Odinus Levels Ã¢â‚¬Â¢ AdministraciÃƒÂ³n v1.4",
         )
 
         return embed
@@ -1281,9 +1464,9 @@ class Niveles(commands.Cog):
         )
 
         embed = discord.Embed(
-            title="🏆 Ranking de niveles",
+            title="Ã°Å¸Ââ€  Ranking de niveles",
             description=(
-                f"Los usuarios con más experiencia de "
+                f"Los usuarios con mÃƒÂ¡s experiencia de "
                 f"**{guild.name}**."
             ),
             color=discord.Color.gold(),
@@ -1291,12 +1474,12 @@ class Niveles(commands.Cog):
 
         if not users:
             embed.description = (
-                "Todavía no hay usuarios con experiencia "
+                "TodavÃƒÂ­a no hay usuarios con experiencia "
                 "registrada en este servidor."
             )
 
             embed.set_footer(
-                text="Odinus Levels • Página 1/1",
+                text="Odinus Levels Ã¢â‚¬Â¢ PÃƒÂ¡gina 1/1",
             )
 
             return embed
@@ -1314,38 +1497,34 @@ class Niveles(commands.Cog):
                 name = member.display_name
                 mention = member.mention
             else:
-                name = (
-                    f"Usuario {user_data.user_id}"
-                )
-                mention = (
-                    f"<@{user_data.user_id}>"
-                )
+                name = f"Usuario {user_data.user_id}"
+                mention = f"<@{user_data.user_id}>"
 
             if rank == 1:
-                position = "🥇"
+                position = "Ã°Å¸Â¥â€¡"
             elif rank == 2:
-                position = "🥈"
+                position = "Ã°Å¸Â¥Ë†"
             elif rank == 3:
-                position = "🥉"
+                position = "Ã°Å¸Â¥â€°"
             else:
                 position = f"**#{rank}**"
 
             lines.append(
-                f"{position} {mention} — **{name}**\n"
-                f"   ⭐ Nivel **{user_data.level}** • "
-                f"✨ **{user_data.total_xp:,} XP**"
+                f"{position} {mention} Ã¢â‚¬â€ **{name}**\n"
+                f"   Ã¢Â­Â Nivel **{user_data.level}** Ã¢â‚¬Â¢ "
+                f"Ã¢Å“Â¨ **{user_data.total_xp:,} XP**"
             )
 
         embed.add_field(
-            name="Clasificación",
+            name="ClasificaciÃƒÂ³n",
             value="\n\n".join(lines),
             inline=False,
         )
 
         embed.set_footer(
             text=(
-                f"Odinus Levels • Página "
-                f"{page + 1}/{total_pages} • "
+                f"Odinus Levels Ã¢â‚¬Â¢ PÃƒÂ¡gina "
+                f"{page + 1}/{total_pages} Ã¢â‚¬Â¢ "
                 f"{total_users} usuarios"
             ),
         )
@@ -1364,10 +1543,10 @@ class Niveles(commands.Cog):
         """Log an administrative level modification."""
         LOGGER.info(
             (
-                "LEVEL ADMIN | Acción=%s | "
+                "LEVEL ADMIN | AcciÃƒÂ³n=%s | "
                 "Servidor=%s | Admin=%s | Usuario=%s | "
                 "Antes=(Nivel %s, XP %s) | "
-                "Después=(Nivel %s, XP %s)"
+                "DespuÃƒÂ©s=(Nivel %s, XP %s)"
             ),
             action,
             guild_id,
@@ -1558,10 +1737,12 @@ class Niveles(commands.Cog):
         if not rewards_above:
             return
 
-        rewards_at_or_below = self.reward_service.get_rewards_between_levels(
-            guild_id=member.guild.id,
-            minimum_level=1,
-            maximum_level=current_level,
+        rewards_at_or_below = (
+            self.reward_service.get_rewards_between_levels(
+                guild_id=member.guild.id,
+                minimum_level=1,
+                maximum_level=current_level,
+            )
         )
 
         protected_role_ids = {
@@ -1612,7 +1793,7 @@ class Niveles(commands.Cog):
                 await member.remove_roles(
                     role,
                     reason=(
-                        f"Odinus: usuario bajó al nivel {current_level}"
+                        f"Odinus: usuario bajÃƒÂ³ al nivel {current_level}"
                     ),
                 )
 
@@ -1766,8 +1947,8 @@ class Niveles(commands.Cog):
         )
 
         return (
-            "█" * filled
-            + "░" * (length - filled)
+            "Ã¢â€“Ë†" * filled
+            + "Ã¢â€“â€˜" * (length - filled)
         )
 
     async def _announce_level_up(
@@ -1775,17 +1956,60 @@ class Niveles(commands.Cog):
         message: discord.Message,
         level: int,
     ) -> None:
-        """Announce a level-up in the channel where it happened."""
+        """Announce a level-up in the configured channel."""
+        channel_id = (
+            self.level_service.repository.get_level_channel(
+                message.guild.id
+            )
+        )
+
+        target_channel = None
+
+        if channel_id is not None:
+            configured_channel = message.guild.get_channel(
+                channel_id
+            )
+
+            if isinstance(
+                configured_channel,
+                discord.TextChannel,
+            ):
+                target_channel = configured_channel
+            else:
+                LOGGER.warning(
+                    (
+                        "Configured level channel is unavailable: "
+                        "guild=%s channel_id=%s."
+                    ),
+                    message.guild.id,
+                    channel_id,
+                )
+
+        if target_channel is None:
+            target_channel = message.channel
+
         try:
-            await message.channel.send(
-                f"🎉 ¡{message.author.mention} ha alcanzado "
+            await target_channel.send(
+                f"Ã°Å¸Å½â€° Ã‚Â¡{message.author.mention} ha alcanzado "
                 f"el **nivel {level}**!"
             )
         except discord.Forbidden:
             LOGGER.warning(
-                "Could not announce level-up for user %s in channel %s.",
+                (
+                    "Could not announce level-up for user %s "
+                    "in channel %s."
+                ),
                 message.author.id,
-                message.channel.id,
+                target_channel.id,
+            )
+        except discord.HTTPException:
+            LOGGER.exception(
+                (
+                    "Discord API error while announcing level-up "
+                    "for user %s in channel %s."
+                ),
+                message.author.id,
+                target_channel.id,
             )
 
 

@@ -61,10 +61,26 @@ class LevelRepository:
                 """
                 CREATE TABLE IF NOT EXISTS level_settings (
                     guild_id INTEGER PRIMARY KEY,
-                    enabled INTEGER NOT NULL DEFAULT 1
+                    enabled INTEGER NOT NULL DEFAULT 1,
+                    channel_id INTEGER
                 )
                 """
             )
+
+            columns = {
+                row[1]
+                for row in connection.execute(
+                    "PRAGMA table_info(level_settings)"
+                ).fetchall()
+            }
+
+            if "channel_id" not in columns:
+                connection.execute(
+                    """
+                    ALTER TABLE level_settings
+                    ADD COLUMN channel_id INTEGER
+                    """
+                )
 
     def get_user(
         self,
@@ -79,7 +95,10 @@ class LevelRepository:
                 FROM user_levels
                 WHERE guild_id = ? AND user_id = ?
                 """,
-                (guild_id, user_id),
+                (
+                    guild_id,
+                    user_id,
+                ),
             ).fetchone()
 
         if row is None:
@@ -208,6 +227,51 @@ class LevelRepository:
             ).fetchone()
 
         return float(row[0]) if row else 0.0
+
+    def get_level_channel(
+        self,
+        guild_id: int,
+    ) -> int | None:
+        """Return the configured level-up announcement channel."""
+        with self._connect() as connection:
+            row = connection.execute(
+                """
+                SELECT channel_id
+                FROM level_settings
+                WHERE guild_id = ?
+                """,
+                (guild_id,),
+            ).fetchone()
+
+        if row is None:
+            return None
+
+        return row[0]
+
+    def set_level_channel(
+        self,
+        guild_id: int,
+        channel_id: int | None,
+    ) -> None:
+        """Configure or clear the level-up announcement channel."""
+        with self._connect() as connection:
+            connection.execute(
+                """
+                INSERT INTO level_settings (
+                    guild_id,
+                    enabled,
+                    channel_id
+                )
+                VALUES (?, 1, ?)
+                ON CONFLICT(guild_id)
+                DO UPDATE SET
+                    channel_id = excluded.channel_id
+                """,
+                (
+                    guild_id,
+                    channel_id,
+                ),
+            )
 
     def is_enabled(
         self,

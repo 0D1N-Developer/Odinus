@@ -198,6 +198,7 @@ class GeneralCog(commands.Cog):
             "**Niveles**\n"
             "`/niveles activar` — Activa la obtención automática de XP.\n"
             "`/niveles desactivar` — Desactiva la obtención automática de XP.\n"
+            "`/niveles_configurar_canal` — Configura el canal donde se muestran los mensajes de niveles.\n"
             "`/nivel_administrar` — Administra el nivel y XP de un miembro.\n\n"
 
             "**Recompensas**\n"
@@ -226,10 +227,36 @@ class GeneralCog(commands.Cog):
                 f"{user_commands}"
             )
 
+        if len(content) <= 2000:
+            await interaction.response.send_message(
+                content,
+                ephemeral=True,
+            )
+            return
+
+        parts = []
+        current = ""
+
+        for line in content.splitlines(keepends=True):
+            if current and len(current) + len(line) > 2000:
+                parts.append(current)
+                current = ""
+
+            current += line
+
+        if current:
+            parts.append(current)
+
         await interaction.response.send_message(
-            content,
+            parts[0],
             ephemeral=True,
         )
+
+        for part in parts[1:]:
+            await interaction.followup.send(
+                part,
+                ephemeral=True,
+            )
 
     @clear.error
     async def clear_error(
