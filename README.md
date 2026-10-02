@@ -119,6 +119,18 @@ mediante los botones publicados por los administradores.
 Las recompensas utilizan roles de Discord y se sincronizan automáticamente
 con los cambios de nivel.
 
+#### Centro de anuncios
+
+Preparado para las próximas integraciones de Minecraft y BlackTibii.com.
+Las fuentes pueden configurarse desde ahora, pero no publicarán anuncios
+hasta que esas integraciones estén disponibles.
+
+* `/anuncios configurar` — Configura una fuente y su canal de anuncios.
+* `/anuncios activar` — Activa una fuente de anuncios.
+* `/anuncios desactivar` — Desactiva una fuente de anuncios.
+* `/anuncios comprobar` — Comprueba la configuración de una fuente.
+* `/anuncios estado` — Muestra el estado de las fuentes configuradas.
+
 ## Sistema de moderación
 
 Odinus incorpora un sistema completo de moderación diseñado para centralizar

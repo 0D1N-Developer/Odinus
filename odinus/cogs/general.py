@@ -207,7 +207,7 @@ class GeneralCog(commands.Cog):
             "`/recompensa eliminar` — Elimina una recompensa por nivel.\n"
             "`/recompensa lista` — Muestra las recompensas configuradas.\n\n"
 
-            "**Centro de anuncios**\n"
+            "**Centro de anuncios** (próximamente: Minecraft y BlackTibii.com)\n"
             "`/anuncios configurar` — Configura una fuente y su canal de anuncios.\n"
             "`/anuncios activar` — Activa una fuente de anuncios.\n"
             "`/anuncios desactivar` — Desactiva una fuente de anuncios.\n"
