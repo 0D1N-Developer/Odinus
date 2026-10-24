@@ -39,6 +39,7 @@ class OdinusBot(commands.Bot):
         await self.load_extension("odinus.cogs.anuncios")
         await self.load_extension("odinus.cogs.server")
         await self.load_extension("odinus.cogs.moderacion")
+        await self.load_extension("odinus.cogs.minecraft")
 
         synced_commands = await self.tree.sync()
 
