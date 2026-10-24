@@ -30,6 +30,7 @@ Odinus cuenta actualmente con sistemas para:
 * Seguimiento automático de invitaciones.
 * Autoroles de países.
 * Autoroles de edad.
+* Autoroles de videojuegos.
 * Consulta de redes sociales de Black Tibii.
 * Sistema completo de moderación manual.
 * Sistema propio de AutoMod.
@@ -101,6 +102,7 @@ mediante los botones publicados por los administradores.
 
 * `/paises` — Configura y publica el selector de autoroles de países.
 * `/edad` — Configura y publica el selector de autoroles de edad.
+* `/juegos` — Configura y publica el selector de autoroles de videojuegos.
 
 #### Niveles
 

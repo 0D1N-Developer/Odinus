@@ -24,6 +24,7 @@ class OdinusBot(commands.Bot):
         await self.load_extension("odinus.cogs.redes")
         await self.load_extension("odinus.cogs.paises")
         await self.load_extension("odinus.cogs.edad")
+        await self.load_extension("odinus.cogs.juegos")
         await self.load_extension("odinus.cogs.niveles")
         await self.load_extension("odinus.cogs.recompensas")
         await self.load_extension("odinus.cogs.perfil")

@@ -193,7 +193,8 @@ class GeneralCog(commands.Cog):
 
             "**Autoroles**\n"
             "`/paises` — Configura el selector de autoroles de países.\n"
-            "`/edad` — Configura el selector de autoroles de edad.\n\n"
+            "`/edad` — Configura el selector de autoroles de edad.\n"
+            "`/juegos` — Configura el selector de autoroles de videojuegos.\n\n"
 
             "**Niveles**\n"
             "`/niveles activar` — Activa la obtención automática de XP.\n"
