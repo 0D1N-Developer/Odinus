@@ -11,6 +11,9 @@ class Settings:
     """Runtime settings required by Odinus."""
 
     discord_token: str
+    minecraft_bridge_host: str = "127.0.0.1"
+    minecraft_bridge_port: int = 8765
+    minecraft_bridge_token: str = ""
 
 
 def load_settings() -> Settings:
@@ -28,6 +31,27 @@ def load_settings() -> Settings:
             "Add your bot token to the .env file."
         )
 
+    port_text = os.getenv(
+        "MINECRAFT_BRIDGE_PORT",
+        "8765",
+    ).strip()
+
+    try:
+        port = int(port_text)
+    except ValueError as error:
+        raise RuntimeError(
+            "MINECRAFT_BRIDGE_PORT must be a number."
+        ) from error
+
     return Settings(
         discord_token=token,
+        minecraft_bridge_host=os.getenv(
+            "MINECRAFT_BRIDGE_HOST",
+            "127.0.0.1",
+        ).strip(),
+        minecraft_bridge_port=port,
+        minecraft_bridge_token=os.getenv(
+            "MINECRAFT_BRIDGE_TOKEN",
+            "",
+        ).strip(),
     )

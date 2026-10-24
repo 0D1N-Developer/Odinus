@@ -6,7 +6,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from odinus.config import load_settings
+from odinus.config import Settings, load_settings
 from odinus.logging_config import configure_logging
 
 
@@ -15,6 +15,14 @@ LOGGER = logging.getLogger(__name__)
 
 class OdinusBot(commands.Bot):
     """Bot container responsible for loading command modules."""
+
+    def __init__(
+        self,
+        settings: Settings,
+        **options,
+    ) -> None:
+        super().__init__(**options)
+        self.settings = settings
 
     async def setup_hook(self) -> None:
         await self.load_extension("odinus.cogs.general")
@@ -40,7 +48,7 @@ class OdinusBot(commands.Bot):
         )
 
 
-def create_bot() -> OdinusBot:
+def create_bot(settings: Settings) -> OdinusBot:
     """Build the bot with the intents needed by this version."""
     intents = discord.Intents.default()
     intents.members = True
@@ -48,6 +56,7 @@ def create_bot() -> OdinusBot:
     intents.message_content = True
 
     return OdinusBot(
+        settings=settings,
         command_prefix="!",
         intents=intents,
     )
@@ -58,7 +67,7 @@ def run() -> None:
     configure_logging()
 
     settings = load_settings()
-    bot = create_bot()
+    bot = create_bot(settings)
 
     try:
         bot.run(
