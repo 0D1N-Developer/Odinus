@@ -424,6 +424,9 @@ class MinecraftCog(commands.Cog):
 
         # Evita anunciar dos veces que el servidor se apagó.
         self.offline_announced = True
+        # Últimos datos recibidos del servidor (nombre, versión, jugadores,
+        # máximo y TPS); se conservan aunque se desconecte.
+        self.server_info: dict[str, Any] = {}
         self.status_dirty = asyncio.Event()
         self.status_task: asyncio.Task[None] | None = None
         self.background_tasks: set[asyncio.Task[None]] = set()
@@ -462,6 +465,13 @@ class MinecraftCog(commands.Cog):
         self.console_lines.cancel()
 
         await self.bridge.stop()
+
+        # Sin Odinus nadie actualiza el estado: se deja en "apagado" para
+        # que no se quede congelado mostrando el servidor en línea.
+        try:
+            await self._update_status_messages()
+        except Exception:
+            LOGGER.exception("Could not mark the Minecraft status as offline.")
 
     # ============================================================ helpers
 
@@ -582,56 +592,63 @@ class MinecraftCog(commands.Cog):
         settings: MinecraftGuildSettings,
         players: list[dict[str, Any]] | None = None,
     ) -> discord.Embed:
-        status = self.bridge.status
-        hello = self.bridge.hello or {}
+        status = self.bridge.status or {}
+        # Justo después del hello todavía no llega el primer status, pero
+        # el hello ya trae los jugadores: el servidor se da por encendido.
         online = (
             self.bridge.connected
-            and status is not None
+            and bool(status or self.bridge.hello)
             and status.get("online", True)
         )
+        # Últimos datos conocidos, para mostrarlos también con el servidor
+        # apagado.
+        info = self.server_info
+        server_name = discord.utils.escape_markdown(
+            str(info.get("server", "Minecraft"))
+        )
+        max_players = info.get("max_players")
+        max_text = str(max_players) if isinstance(max_players, int) else "—"
 
         if online:
             embed = discord.Embed(
                 title="🟢 Servidor de Minecraft en línea",
-                description=f"**{hello.get('server', 'Minecraft')}**",
+                description=f"**{server_name}**",
                 color=discord.Color.green(),
                 timestamp=discord.utils.utcnow(),
             )
-
-            embed.add_field(
-                name="👥 Jugadores",
-                value=f"{status.get('players', 0)}/{status.get('max_players', 0)}",
-                inline=True,
-            )
-
-            tps = status.get("tps")
-
-            if isinstance(tps, (int, float)):
-                embed.add_field(name="⚡ TPS", value=f"{tps:.1f}", inline=True)
-
-            if hello.get("minecraft_version"):
-                embed.add_field(
-                    name="🧩 Versión",
-                    value=str(hello["minecraft_version"]),
-                    inline=True,
-                )
-
-            if players:
-                names = ", ".join(
-                    discord.utils.escape_markdown(str(player.get("name", "?")))
-                    for player in players
-                )
-                embed.add_field(
-                    name="🎮 Conectados",
-                    value=names[:1024],
-                    inline=False,
-                )
+            players_text = f"{info.get('players', 0)}/{max_text}"
+            tps = info.get("tps")
+            tps_text = f"{tps:.1f}" if isinstance(tps, (int, float)) else "—"
         else:
             embed = discord.Embed(
                 title="🔴 Servidor de Minecraft apagado",
-                description="El servidor está apagado o sin conexión con Odinus.",
+                description=(
+                    f"**{server_name}**\n"
+                    "El servidor está apagado o sin conexión con Odinus."
+                ),
                 color=discord.Color.red(),
                 timestamp=discord.utils.utcnow(),
+            )
+            players_text = f"0/{max_text}"
+            tps_text = "—"
+
+        embed.add_field(name="👥 Jugadores", value=players_text, inline=True)
+        embed.add_field(name="⚡ TPS", value=tps_text, inline=True)
+        embed.add_field(
+            name="🧩 Versión",
+            value=str(info.get("minecraft_version", "—")),
+            inline=True,
+        )
+
+        if online and players:
+            names = ", ".join(
+                discord.utils.escape_markdown(str(player.get("name", "?")))
+                for player in players
+            )
+            embed.add_field(
+                name="🎮 Conectados",
+                value=names[:1024],
+                inline=False,
             )
 
         # La dirección se muestra siempre, también con el servidor apagado,
@@ -662,6 +679,21 @@ class MinecraftCog(commands.Cog):
     ) -> None:
         """Handle plugin events (runs inside the bridge read loop)."""
         name = clean_text(data.get("name", "?"), 32)
+
+        if event_type in ("hello", "status"):
+            self.server_info.update(
+                {
+                    key: data[key]
+                    for key in (
+                        "server",
+                        "minecraft_version",
+                        "players",
+                        "max_players",
+                        "tps",
+                    )
+                    if key in data
+                }
+            )
 
         if event_type == "hello":
             self.offline_announced = False
