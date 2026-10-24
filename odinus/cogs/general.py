@@ -148,7 +148,15 @@ class GeneralCog(commands.Cog):
             "`/perfil [usuario]` — Muestra el perfil visual de un miembro.\n"
             "`/nivel [usuario]` — Consulta el nivel, XP y progreso de un miembro.\n"
             "`/cumpleaños registrar` — Registra una fecha de cumpleaños.\n"
-            "`/cumpleaños lista` — Consulta los cumpleaños registrados."
+            "`/cumpleaños lista` — Consulta los cumpleaños registrados.\n\n"
+
+            "**⛏️ Minecraft**\n"
+            "`/minecraft estado` — Muestra el estado del servidor y quién está jugando.\n"
+            "`/minecraft vincular` — Vincula tu cuenta de Discord con tu jugador.\n"
+            "`/minecraft desvincular` — Quita el vínculo con tu jugador.\n"
+            "`/minecraft perfil [usuario]` — Muestra el jugador, rango y dinero de un miembro.\n"
+            "`/minecraft saldo [usuario]` — Consulta la cartera y el banco.\n"
+            "`/minecraft top` — Ranking de los jugadores con más dinero."
         )
 
         admin_commands = (
@@ -207,6 +215,15 @@ class GeneralCog(commands.Cog):
             "`/recompensa editar` — Edita una recompensa por nivel.\n"
             "`/recompensa eliminar` — Elimina una recompensa por nivel.\n"
             "`/recompensa lista` — Muestra las recompensas configuradas.\n\n"
+
+            "**Minecraft**\n"
+            "`/minecraft_admin canal` — Configura los canales de chat, consola, estado, economía y vinculación.\n"
+            "`/minecraft_admin direccion` — Configura la IP de Java y Bedrock que se muestra en el estado.\n"
+            "`/minecraft_admin depositar` — Da dinero de Minecraft a un miembro vinculado.\n"
+            "`/minecraft_admin retirar` — Quita dinero de Minecraft a un miembro vinculado.\n"
+            "`/minecraft_admin whitelist` — Añade o quita un nick de la whitelist.\n"
+            "`/minecraft_admin desvincular` — Quita el vínculo de Minecraft de un miembro.\n"
+            "`/minecraft_admin comando` — Ejecuta un comando en la consola del servidor.\n\n"
 
             "**Centro de anuncios** (próximamente: Minecraft y BlackTibii.com)\n"
             "`/anuncios configurar` — Configura una fuente y su canal de anuncios.\n"

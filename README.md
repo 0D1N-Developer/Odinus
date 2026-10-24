@@ -51,6 +51,12 @@ Odinus cuenta actualmente con sistemas para:
 * `/nivel [usuario]` — Consulta el nivel, experiencia y progreso de un miembro.
 * `/cumpleaños registrar` — Registra una fecha de cumpleaños.
 * `/cumpleaños lista` — Consulta los cumpleaños registrados del servidor.
+* `/minecraft estado` — Muestra el estado del servidor de Minecraft y quién está jugando.
+* `/minecraft vincular` — Vincula tu cuenta de Discord con tu jugador de Minecraft.
+* `/minecraft desvincular` — Quita el vínculo con tu jugador de Minecraft.
+* `/minecraft perfil [usuario]` — Muestra el jugador, rango y dinero de un miembro.
+* `/minecraft saldo [usuario]` — Consulta la cartera y el banco de Minecraft.
+* `/minecraft top` — Ranking de los jugadores con más dinero.
 
 Los sistemas de autoroles de país y edad son utilizados por los miembros
 mediante los botones publicados por los administradores.
@@ -120,6 +126,16 @@ mediante los botones publicados por los administradores.
 
 Las recompensas utilizan roles de Discord y se sincronizan automáticamente
 con los cambios de nivel.
+
+#### Minecraft
+
+* `/minecraft_admin canal` — Configura los canales de chat, consola, estado, economía y vinculación.
+* `/minecraft_admin direccion` — Configura la IP de Java y Bedrock que se muestra en el estado.
+* `/minecraft_admin depositar` — Da dinero de Minecraft a un miembro vinculado.
+* `/minecraft_admin retirar` — Quita dinero de Minecraft a un miembro vinculado.
+* `/minecraft_admin whitelist` — Añade o quita un nick de la whitelist del servidor.
+* `/minecraft_admin desvincular` — Quita el vínculo de Minecraft de un miembro.
+* `/minecraft_admin comando` — Ejecuta un comando en la consola del servidor.
 
 #### Centro de anuncios
 
@@ -378,6 +394,33 @@ Las próximas integraciones serán:
 Estas integraciones serán desarrolladas directamente por 0D1N SOFTWARE,
 evitando depender de APIs externas de redes sociales para el funcionamiento
 principal del bot.
+
+## Integración con Minecraft
+
+Odinus se conecta con el servidor de Minecraft mediante el plugin propio
+**Odin-Discord**. El plugin es quien se conecta al bot (WebSocket con un
+token compartido), así que funciona igual en local que en un servidor rentado:
+solo cambia la URL en la configuración del plugin.
+
+* **Chat de Minecraft:** el chat del juego, las entradas, salidas, muertes y
+  logros se muestran como una terminal de corrido (Odinus edita su último
+  mensaje en vez de enviar uno nuevo), y lo que se escribe en ese canal
+  llega al juego.
+* **Consola de admins:** un canal privado recibe la consola real del servidor
+  y lo que escribe un administrador ahí se ejecuta como comando; el comando
+  y su respuesta aparecen en la misma terminal.
+* **Estado:** un mensaje fijo que se actualiza solo (en línea, jugadores, TPS)
+  y muestra la IP de Java y Bedrock si se configura con `/minecraft_admin direccion`.
+* **Vinculación:** `/minecraft vincular` pone el nick en la whitelist y da un
+  código que el jugador confirma dentro del juego con `/vincular <código>`.
+  El canal de vinculación recibe un mensaje con la explicación.
+* **Economía y rangos:** cartera, banco, ranking y rangos de Odin-Economy y
+  Odin-Ranks consultados en vivo; Odinus no guarda saldos propios. El canal
+  de economía recibe un mensaje con los comandos disponibles.
+
+Configuración en `.env`: `MINECRAFT_BRIDGE_HOST`, `MINECRAFT_BRIDGE_PORT` y
+`MINECRAFT_BRIDGE_TOKEN` (el mismo valor que `bridge.token` del plugin). Sin
+token, la integración queda desactivada.
 
 ## Sistemas automáticos
 
