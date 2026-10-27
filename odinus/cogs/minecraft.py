@@ -7,6 +7,7 @@ import logging
 import re
 import secrets
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -26,6 +27,10 @@ from odinus.services.minecraft import (
 )
 
 LOGGER = logging.getLogger(__name__)
+SERVER_BANNER = (
+    Path(__file__).resolve().parents[2] / "docs" / "assets" / "odinitycraft-banner.png"
+)
+SERVER_BANNER_URL = f"attachment://{SERVER_BANNER.name}"
 
 MEXICO_CITY = ZoneInfo("America/Mexico_City")
 
@@ -217,6 +222,7 @@ def build_link_intro_embed(settings: MinecraftGuildSettings) -> discord.Embed:
         )
 
     embed.set_footer(text="Odinus • Minecraft")
+    embed.set_image(url=SERVER_BANNER_URL)
     return embed
 
 
@@ -266,6 +272,7 @@ def build_economy_intro_embed(settings: MinecraftGuildSettings) -> discord.Embed
     )
 
     embed.set_footer(text="Odinus • Odin Economy")
+    embed.set_image(url=SERVER_BANNER_URL)
     return embed
 
 
@@ -429,6 +436,7 @@ class MinecraftCog(commands.Cog):
         self.server_info: dict[str, Any] = {}
         self.status_dirty = asyncio.Event()
         self.status_task: asyncio.Task[None] | None = None
+        self._branded_status_messages: set[int] = set()
         self.background_tasks: set[asyncio.Task[None]] = set()
 
     async def cog_load(self) -> None:
@@ -668,6 +676,7 @@ class MinecraftCog(commands.Cog):
             )
 
         embed.set_footer(text="Odinus • Minecraft")
+        embed.set_image(url=SERVER_BANNER_URL)
         return embed
 
     # ====================================================== bridge events
@@ -852,8 +861,49 @@ class MinecraftCog(commands.Cog):
 
     # ====================================================== status message
 
+    async def _publish_intro(
+        self,
+        channel: discord.TextChannel,
+        intro: discord.Embed,
+        *,
+        create: bool = True,
+    ) -> None:
+        """Refresh the existing welcome card, optionally creating it if absent."""
+        async for message in channel.history(limit=100):
+            if message.author.id == self.bot.user.id and any(
+                embed.title == intro.title for embed in message.embeds
+            ):
+                logo = discord.File(SERVER_BANNER)
+                try:
+                    await message.edit(embed=intro, attachments=[logo])
+                finally:
+                    logo.close()
+                return
+        if create:
+            await channel.send(embed=intro, file=discord.File(SERVER_BANNER))
+
+    async def _refresh_intro_messages(self) -> None:
+        """Apply the current artwork to existing welcome cards at startup."""
+        for settings in list(self.guild_settings.values()):
+            for channel_id, builder in (
+                (settings.link_channel_id, build_link_intro_embed),
+                (settings.economy_channel_id, build_economy_intro_embed),
+            ):
+                channel = self.bot.get_channel(channel_id) if channel_id else None
+                if not isinstance(channel, discord.TextChannel):
+                    continue
+                try:
+                    await self._publish_intro(channel, builder(settings), create=False)
+                except discord.HTTPException:
+                    LOGGER.warning(
+                        "Could not refresh Minecraft welcome card channel_id=%s",
+                        channel_id,
+                        exc_info=True,
+                    )
+
     async def _status_loop(self) -> None:
         await self.bot.wait_until_ready()
+        await self._refresh_intro_messages()
 
         while True:
             await self.status_dirty.wait()
@@ -875,9 +925,16 @@ class MinecraftCog(commands.Cog):
                 continue
 
             try:
-                await channel.get_partial_message(
-                    settings.status_message_id
-                ).edit(embed=embed)
+                message = channel.get_partial_message(settings.status_message_id)
+                if message.id in self._branded_status_messages:
+                    await message.edit(embed=embed)
+                else:
+                    logo = discord.File(SERVER_BANNER)
+                    try:
+                        await message.edit(embed=embed, attachments=[logo])
+                    finally:
+                        logo.close()
+                    self._branded_status_messages.add(message.id)
             except discord.NotFound:
                 LOGGER.warning(
                     "Minecraft status message was deleted guild_id=%s",
@@ -1066,6 +1123,7 @@ class MinecraftCog(commands.Cog):
                 self._settings(interaction.guild_id or 0),
                 players,
             ),
+            file=discord.File(SERVER_BANNER),
         )
 
     @minecraft.command(
@@ -1433,6 +1491,12 @@ class MinecraftCog(commands.Cog):
         if not permissions.embed_links:
             missing.append("Insertar enlaces")
 
+        if tipo.value in ("estado", "economia", "vinculacion"):
+            if not permissions.attach_files:
+                missing.append("Adjuntar archivos")
+            if tipo.value != "estado" and not permissions.read_message_history:
+                missing.append("Leer el historial de mensajes")
+
         # En las terminales se borra lo que se escribe para mostrarlo
         # como una línea más.
         if tipo.value in ("chat", "consola") and not permissions.manage_messages:
@@ -1459,12 +1523,11 @@ class MinecraftCog(commands.Cog):
             )
             return
 
-        previous = self._settings(guild.id)
-
         if tipo.value == "estado":
             try:
                 message = await canal.send(
-                    embed=self._status_embed(self._settings(guild.id))
+                    embed=self._status_embed(self._settings(guild.id)),
+                    file=discord.File(SERVER_BANNER),
                 )
             except discord.HTTPException:
                 await interaction.response.send_message(
@@ -1474,6 +1537,7 @@ class MinecraftCog(commands.Cog):
                 return
 
             self.repository.set_status_message(guild.id, canal.id, message.id)
+            self._branded_status_messages.add(message.id)
         else:
             self.repository.set_channel(guild.id, tipo.value, canal.id)
 
@@ -1482,17 +1546,17 @@ class MinecraftCog(commands.Cog):
 
         extra = ""
 
-        # El mensaje de bienvenida solo se publica al estrenar el canal.
+        # Reconfigurar el canal permite renovar su tarjeta existente.
         intro = None
 
-        if tipo.value == "economia" and previous.economy_channel_id != canal.id:
+        if tipo.value == "economia":
             intro = build_economy_intro_embed(settings)
-        elif tipo.value == "vinculacion" and previous.link_channel_id != canal.id:
+        elif tipo.value == "vinculacion":
             intro = build_link_intro_embed(settings)
 
         if intro is not None:
             try:
-                await canal.send(embed=intro)
+                await self._publish_intro(canal, intro)
             except discord.HTTPException:
                 extra = "\n⚠️ No pude publicar el mensaje de bienvenida del canal."
 
